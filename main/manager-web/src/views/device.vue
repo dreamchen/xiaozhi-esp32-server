@@ -35,37 +35,62 @@
             <el-breadcrumb separator="/">
               <el-breadcrumb-item>控制台</el-breadcrumb-item>
               <el-breadcrumb-item><router-link to="/home">智能体</router-link></el-breadcrumb-item>
-              <el-breadcrumb-item>设备</el-breadcrumb-item>
+              <el-breadcrumb-item>设备管理</el-breadcrumb-item>
             </el-breadcrumb>
           </div>
-          <!-- 智能体列表-->
-          <div style="display: flex;flex-wrap: wrap;margin-top: 20px;">
-            <el-table :data="devices" style="width: 100%">
-              <el-table-column prop="device_type" label="设备型号">
-              </el-table-column>
-              <el-table-column prop="app_version" label="固件版本" width="180">
-              </el-table-column>
-              <el-table-column prop="mac_address" label="MAC地址">
-              </el-table-column>
-              <el-table-column prop="bind_time" label="绑定时间">
-              </el-table-column>
-              <el-table-column prop="recent_chat_time" label="最近对话">
-              </el-table-column>
-              <el-table-column prop="desc" label="备注">
-              </el-table-column>
-              <el-table-column label="OTA升级" width="100" align="center">
-                <template slot-scope="scope">
-                  <el-switch v-model="scope.row.ota_upgrade" :active-value="1" :inactive-value="0" active-color="#13ce66" inactive-color="#ff4949">
-                  </el-switch>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="80" align="center">
-                <template slot-scope="scope">
-                  <el-button size="mini" type="danger">解绑</el-button>
-                </template>
-              </el-table-column>
-            </el-table>
+          <!-- 设备列表-->
+          <el-card class="box-card" shadow="hover" style="margin-top: 20px;">
+            <div slot="header" class="clearfix" style="text-align: left;">
+              <span>设备列表</span>
+            </div>
+            <div style="display: flex;flex-direction: column;align-items: end;padding: 0 20px;gap: 10px;">
+              <el-table :data="devices" style="width: 100%">
+                <el-table-column prop="device_type" label="设备型号">
+                </el-table-column>
+                <el-table-column prop="app_version" label="固件版本" width="180">
+                </el-table-column>
+                <el-table-column prop="mac_address" label="MAC地址">
+                </el-table-column>
+                <el-table-column prop="bind_time" label="绑定时间">
+                </el-table-column>
+                <el-table-column prop="recent_chat_time" label="最近对话">
+                </el-table-column>
+                <el-table-column prop="desc" label="备注">
+                  <template slot-scope="scope">
+                    <div v-if="scope.row.isEdit">
+                      <el-input
+                        placeholder="请输入内容"
+                        v-model="scope.row.desc"
+                        @blur="handleEditSave(scope.row)"
+                        clearable>
+                      </el-input>
+                    </div>
+                    <div v-else>
+                      {{ scope.row.desc }}
+                      <i class="el-icon-edit" style="color:#1890ff;cursor: pointer;" @click="handleEdit(scope.row)"></i>
+                    </div>
+                  </template>
+                </el-table-column>
+                <el-table-column label="OTA升级" width="100" align="center">
+                  <template slot-scope="scope">
+                    <el-switch v-model="scope.row.ota_upgrade" :active-value="1" :inactive-value="0" active-color="#13ce66" inactive-color="#ff4949">
+                    </el-switch>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="80" align="center">
+                  <template slot-scope="scope">
+                    <el-button size="mini" type="danger">解绑</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <el-pagination
+                :page-size="10"
+                :pager-count="5"
+                layout="prev, pager, next"
+                :total="150">
+              </el-pagination>
           </div>
+          </el-card>
         </div>
         <!-- 底部 -->
         <Footer :visible="true" />
@@ -96,10 +121,11 @@ export default {
     this.getDeviceList();
   },
   methods: {
+    // 获取设备列表
     getDeviceList() {
       Api.device.getDeviceList(this.agentId, ({data}) => {
         if (data.code === 0) {
-          this.devices = data.data[0].list
+          this.devices = data.data[0].list.map((item)=>{item.isEdit=false;return item;})
         } else {
           showDanger(data.msg)
         }
@@ -115,7 +141,13 @@ export default {
     handleDeviceAdded(deviceCode) {
       // 根据需要处理添加设备后逻辑，比如刷新设备列表等
       console.log('设备验证码：', deviceCode)
-    }
+    },
+    handleEdit(row) {
+      row.isEdit=true
+    },
+    handleEditSave(row) {
+      row.isEdit=false
+    },
   }
 }
 </script>

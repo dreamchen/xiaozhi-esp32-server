@@ -19,9 +19,9 @@
       </div>
       <div style="display: flex;align-items: center;gap: 10px;">
         <div class="serach-box">
-          <el-input placeholder="输入名称搜索.." v-model="serach" />
+          <el-input placeholder="输入名称搜索.." v-model="serach" style="border: none; background: transparent;"/>
           <img src="@/assets/home/search.png" alt=""
-               style="width: 16px;height: 16px;margin:0 15px 0 10px;cursor: pointer;" />
+               style="width: 14px;height: 14px;margin-right: 11px;cursor: pointer;" />
         </div>
         <img src="@/assets/home/avatar.png" alt="" style="width: 28px;height: 28px;" />
         <el-dropdown>
@@ -83,11 +83,24 @@ export default {
 
 .serach-box {
   display: flex;
-  width: 306px;
-  height: 40px;
-  border-radius: 20px;
-  background-color: #e2f5f7;
+  width: 220px;
+  height: 30px;
+  border-radius: 15px;
+  background-color: #f6fcfe66;
+  border: 1px solid #e4e6ef;
   align-items: center;
+  padding: 0 7px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-right: 15px;
+}
+
+.serach-box /deep/ .el-input__inner {
+  border-radius: 15px;
+  height: 100%;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding-left: 12px;
 }
 
 .user-info {
