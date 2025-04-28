@@ -67,4 +67,17 @@ export default {
                 })
             }).send()
     },
+    delMemSummary(id, callback) {
+        RequestService.sendRequest()
+            .url(`${getServiceUrl()}/device/delMemSummary/${id}`)
+            .method('DELETE')
+            .success((res) => {
+                RequestService.clearRequestTime()
+                callback(res)
+            })
+            .fail((err) => {
+                console.error('删除记忆总结失败:', err)
+                this.$message.error(err.msg || '删除记忆总结失败')
+            }).send()
+    },
 }

@@ -1,5 +1,6 @@
 package xiaozhi.modules.device.service;
 
+import java.util.Date;
 import java.util.List;
 
 import xiaozhi.common.page.PageData;
@@ -71,6 +72,15 @@ public interface DeviceService extends BaseService<DeviceEntity> {
      */
     DeviceEntity getDeviceByMacAddress(String macAddress);
 
+
+    /**
+     * 根据ID设置记忆总结
+     *
+     * @param id MAC地址
+     * @param memSummary 记忆总结
+     */
+    void saveMemSummary(String id, String memSummary);
+
     /**
      * 根据设备ID获取激活码
      * 
@@ -78,4 +88,13 @@ public interface DeviceService extends BaseService<DeviceEntity> {
      * @return 激活码
      */
     String geCodeByDeviceId(String deviceId);
+
+
+    /**
+     * 根据智能体ID获取设备最后连接时间
+     *
+     * @param agentId 智能体ID
+     * @return 最后连接时间
+     */
+    Date getLastConnectedAt(String agentId);
 }

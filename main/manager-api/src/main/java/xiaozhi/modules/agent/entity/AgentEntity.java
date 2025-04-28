@@ -27,6 +27,9 @@ public class AgentEntity {
     @Schema(description = "智能体名称")
     private String agentName;
 
+    @Schema(description = "助手名称")
+    private String assistantName;
+
     @Schema(description = "语音识别模型标识")
     private String asrModelId;
 
@@ -41,6 +44,9 @@ public class AgentEntity {
 
     @Schema(description = "音色标识")
     private String ttsVoiceId;
+
+    @Schema(description = "音色标识类型：0：官方、1：复刻")
+    private Integer ttsVoiceType;
 
     @Schema(description = "记忆模型标识")
     private String memModelId;

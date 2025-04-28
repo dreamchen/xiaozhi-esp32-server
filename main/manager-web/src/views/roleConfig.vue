@@ -25,8 +25,11 @@
               <div class="form-content">
                 <div class="form-grid">
                   <div class="form-column">
-                    <el-form-item label="助手昵称：">
+                    <el-form-item label="智能体名称：">
                       <el-input v-model="form.agentName" class="form-input"/>
+                    </el-form-item>
+                    <el-form-item label="助手昵称：">
+                      <el-input v-model="form.assistantName" class="form-input"/>
                     </el-form-item>
                     <el-form-item label="角色模版：">
                       <div class="template-container">
@@ -110,8 +113,9 @@
                         <el-option
                             v-for="(item, index) in voiceOptions"
                             :key="`voice-${index}`"
-                            :label="item.label"
+                            :label="item.type?item.label+' - 复刻':item.label+' - 官方'"
                             :value="item.value"
+                            :type="item.type"
                         />
                       </el-select>
                     </el-form-item>
@@ -139,7 +143,9 @@ export default {
       form: {
         agentCode: "",
         agentName: "",
+        assistantName: "",
         ttsVoiceId: "",
+        ttsVoiceType: "",
         systemPrompt: "",
         langCode: "",
         language: "",
@@ -175,11 +181,13 @@ export default {
       const configData = {
         agentCode: this.form.agentCode,
         agentName: this.form.agentName,
+        assistantName: this.form.assistantName,
         asrModelId: this.form.model.asrModelId,
         vadModelId: this.form.model.vadModelId,
         llmModelId: this.form.model.llmModelId,
         ttsModelId: this.form.model.ttsModelId,
         ttsVoiceId: this.form.ttsVoiceId,
+        ttsVoiceType: this.form.ttsVoiceType,
         memModelId: this.form.model.memModelId,
         intentModelId: this.form.model.intentModelId,
         systemPrompt: this.form.systemPrompt,
@@ -210,7 +218,9 @@ export default {
         this.form = {
           agentCode: "",
           agentName: "",
+          assistantName: "",
           ttsVoiceId: "",
+          ttsVoiceType: "",
           systemPrompt: "",
           langCode: "",
           language: "",
@@ -263,7 +273,9 @@ export default {
       this.form = {
         ...this.form,
         agentName: templateData.agentName || this.form.agentName,
+        assistantName: templateData.assistantName || this.form.assistantName,
         ttsVoiceId: templateData.ttsVoiceId || this.form.ttsVoiceId,
+        ttsVoiceType: templateData.ttsVoiceType || this.form.ttsVoiceType,
         systemPrompt: templateData.systemPrompt || this.form.systemPrompt,
         langCode: templateData.langCode || this.form.langCode,
         model: {
@@ -319,10 +331,24 @@ export default {
         if (data.code === 0 && data.data) {
           this.voiceOptions = data.data.map(voice => ({
             value: voice.id,
+            type: 0,
             label: voice.name
           }));
         } else {
           this.voiceOptions = [];
+        }
+      });
+      //获取自定义音色
+      Api.timbre.getCloneList({modelId: modelId, page:1, limit: 100}, ({data}) => {
+        if (data.code === 0 && data.data) {
+          let _voiceOptions = data.data.list.map(voice => ({
+            value: voice.id,
+            type: 1,
+            label: voice.name
+          }));
+          if(_voiceOptions){
+            this.voiceOptions = _voiceOptions.concat(this.voiceOptions);
+          }
         }
       });
     }

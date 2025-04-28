@@ -5,7 +5,7 @@ from config.manage_api_client import init_service, get_server_config, get_agent_
 
 
 # 添加全局配置缓存
-_config_cache = None
+# _config_cache = None
 
 
 def get_project_dir():
@@ -21,9 +21,9 @@ def read_config(config_path):
 
 def load_config():
     """加载配置文件"""
-    global _config_cache
-    if _config_cache is not None:
-        return _config_cache
+    # global _config_cache
+    # if _config_cache is not None:
+    #     return _config_cache
 
     parser = argparse.ArgumentParser(description="Server configuration")
     config_file = get_config_file()
@@ -37,7 +37,7 @@ def load_config():
 
     # 初始化目录
     ensure_directories(config)
-    _config_cache = config
+    # _config_cache = config
     return config
 
 

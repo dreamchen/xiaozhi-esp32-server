@@ -4,13 +4,21 @@ from datetime import datetime
 
 
 class Message:
-    def __init__(self, role: str, content: str = None, uniq_id: str = None, tool_calls = None, tool_call_id=None):
+    def __init__(self, role: str, content: str = None, uniq_id: str = None, tool_calls = None, tool_call_id=None, timestamp = None):
         self.uniq_id = uniq_id if uniq_id is not None else str(uuid.uuid4())
         self.role = role
         self.content = content
         self.tool_calls = tool_calls
         self.tool_call_id = tool_call_id
+        self.timestamp = timestamp if timestamp is not None else int(datetime.now().timestamp() * 1000)
 
+    def to_dict(self):
+        return {
+            "uniq_id": self.uniq_id,
+            "role": self.role,
+            "content": self.content,
+            "timestamp": self.timestamp,
+        }
 
 class Dialogue:
     def __init__(self):
@@ -59,8 +67,8 @@ class Dialogue:
 
         if system_message:
             enhanced_system_prompt = (
-                f"{system_message.content}\n\n"
-                f"相关记忆：\n{memory_str}"
+                f"{system_message.content}\n"
+                f"[相关记忆]\n{memory_str}"
             )
             dialogue.append({"role": "system", "content": enhanced_system_prompt})
 
@@ -70,3 +78,10 @@ class Dialogue:
                 self.getMessages(m, dialogue)
 
         return dialogue
+
+    def get_json_dialogue(self) -> str:
+        return json.dumps(
+            [msg.to_dict() for msg in self.dialogue],
+            ensure_ascii=False,
+            indent=2
+        )

@@ -4,13 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -89,6 +83,19 @@ public class DeviceController {
             return new Result<Void>().error("设备不存在");
         }
         entity.setAutoUpdate(status);
+        deviceService.updateById(entity);
+        return new Result<Void>();
+    }
+
+    @DeleteMapping("/delMemSummary/{id}")
+    @Operation(summary = "删除记忆总结")
+    @RequiresPermissions("sys:role:normal")
+    public Result<Void> delMemSummary(@PathVariable String id) {
+        DeviceEntity entity = deviceService.selectById(id);
+        if (entity == null) {
+            return new Result<Void>().error("设备不存在");
+        }
+        entity.setMemSummary("");
         deviceService.updateById(entity);
         return new Result<Void>();
     }

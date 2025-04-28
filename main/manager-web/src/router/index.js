@@ -47,6 +47,14 @@ const routes = [
       return import('../views/DeviceManagement.vue')
     }
   },
+  // 聊天记录页面路由
+  {
+    path: '/chat-history',
+    name: 'ChatHistory',
+    component: function () {
+      return import('../views/chatHistory.vue')
+    }
+  },
   // 添加用户管理路由
   {
     path: '/user-management',
@@ -60,6 +68,13 @@ const routes = [
     name: 'ModelConfig',
     component: function () {
       return import('../views/ModelConfig.vue')
+    }
+  },
+  {
+    path: '/voiceClone-management',
+    name: 'VoiceCloneManagement',
+    component: function () {
+      return import('../views/voiceCloneManagement.vue')
     }
   },
   {
@@ -84,6 +99,13 @@ const routes = [
       title: 'OTA管理'
     }
   },
+  {
+    path: '/test',
+    name: 'Test',
+    component: function () {
+      return import('../views/test.vue')
+    },
+  }
 ]
 
 const router = new VueRouter({

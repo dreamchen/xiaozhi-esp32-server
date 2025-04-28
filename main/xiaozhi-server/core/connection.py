@@ -57,6 +57,7 @@ class ConnectionHandler:
         self.client_ip_info = {}
         self.session_id = None
         self.prompt = None
+        self.mem_summary = None
         self.welcome_msg = None
         self.max_output_size = 0
 
@@ -194,9 +195,13 @@ class ConnectionHandler:
             await self._save_and_close(ws)
 
     async def _save_and_close(self, ws):
+        print(f"_save_and_close")
         """保存记忆并关闭连接"""
         try:
             await self.memory.save_memory(self.dialogue.dialogue)
+            print(f"_save_and_close save_memory")
+            await self.memory.set_mem_summary(self.dialogue.dialogue)
+            print(f"_save_and_close mem_summary")
         except Exception as e:
             self.logger.bind(tag=TAG).error(f"保存记忆失败: {e}")
         finally:
@@ -216,18 +221,30 @@ class ConnectionHandler:
 
     def _initialize_components(self, private_config):
         """初始化组件"""
+        print(f"_initialize_components private_config: {private_config}")
         if private_config is not None:
             self._initialize_models(private_config)
         else:
             self.prompt = self.config["prompt"]
             self.change_system_prompt(self.prompt)
+            self.mem_summary = self.config["mem_summary"]
         """加载记忆"""
-        self._initialize_memory()
+        print("_initialize_components _initialize_memory")
+        self._initialize_memory(private_config)
         """加载意图识别"""
+        print("_initialize_components _initialize_intent")
         self._initialize_intent()
+        """加载位置信息"""
+        self.client_ip_info = get_ip_info(self.client_ip, self.logger)
+        if self.client_ip_info is not None and "city" in self.client_ip_info:
+            self.logger.bind(tag=TAG).info(f"Client ip info: {self.client_ip_info}")
+            self.prompt = self.prompt + f"\n用户位置:\n{self.client_ip_info.get('city')}"
+
+            self.dialogue.update_system_message(self.prompt)
 
     def _initialize_private_config(self):
         read_config_from_api = self.config.get("read_config_from_api", False)
+        print(f"_initialize_private_config read_config_from_api: {read_config_from_api}")
         """如果是从配置文件获取，则进行二次实例化"""
         if not read_config_from_api:
             return
@@ -244,9 +261,11 @@ class ConnectionHandler:
                 f"{time.time() - begin_time} 秒，获取差异化配置成功: {private_config}"
             )
         except DeviceNotFoundException as e:
+            print("设备未绑定，请先绑定设备")
             self.need_bind = True
             private_config = {}
         except DeviceBindException as e:
+            print(f"设备未绑定，请先绑定设备, code:{e.bind_code}")
             self.need_bind = True
             self.bind_code = e.bind_code
             private_config = {}
@@ -348,11 +367,14 @@ class ConnectionHandler:
             self.intent = modules["intent"]
         if modules.get("memory", None) is not None:
             self.memory = modules["memory"]
+        if modules.get("mem_summary", None) is not None:
+            self.mem_summary = modules["mem_summary"]
 
-    def _initialize_memory(self):
+    def _initialize_memory(self, private_config):
         """初始化记忆模块"""
         device_id = self.headers.get("device-id", None)
         self.memory.init_memory(device_id, self.llm)
+        self.memory.load_mem_summary(self.mem_summary)
 
     def _initialize_intent(self):
         if (
@@ -507,7 +529,7 @@ class ConnectionHandler:
             )
             memory_str = future.result()
 
-            # self.logger.bind(tag=TAG).info(f"对话记录: {self.dialogue.get_llm_dialogue_with_memory(memory_str)}")
+            self.logger.bind(tag=TAG).info(f"对话记录: {self.dialogue.get_llm_dialogue_with_memory(memory_str)}")
 
             # 使用支持functions的streaming接口
             llm_responses = self.llm.response_with_functions(
@@ -878,7 +900,7 @@ class ConnectionHandler:
             self.executor = None
 
         # 清空任务队列
-        self.clear_queues()
+        self._clear_queues()
 
         if ws:
             await ws.close()
@@ -886,11 +908,8 @@ class ConnectionHandler:
             await self.websocket.close()
         self.logger.bind(tag=TAG).info("连接资源已释放")
 
-    def clear_queues(self):
+    def _clear_queues(self):
         # 清空所有任务队列
-        self.logger.bind(tag=TAG).info(
-            f"开始清理: TTS队列大小={self.tts_queue.qsize()}, 音频队列大小={self.audio_play_queue.qsize()}"
-        )
         for q in [self.tts_queue, self.audio_play_queue]:
             if not q:
                 continue
@@ -902,9 +921,6 @@ class ConnectionHandler:
             q.queue.clear()
             # 添加毒丸信号到队列，确保线程退出
             # q.queue.put(None)
-        self.logger.bind(tag=TAG).info(
-            f"清理结束: TTS队列大小={self.tts_queue.qsize()}, 音频队列大小={self.audio_play_queue.qsize()}"
-        )
 
     def reset_vad_states(self):
         self.client_audio_buffer = bytearray()

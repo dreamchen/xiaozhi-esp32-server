@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,7 @@ import xiaozhi.modules.agent.service.AgentService;
 import xiaozhi.modules.agent.service.AgentTemplateService;
 import xiaozhi.modules.device.service.DeviceService;
 import xiaozhi.modules.security.user.SecurityUser;
+import xiaozhi.modules.timbre.entity.VoiceCloneEntity;
 
 @Tag(name = "智能体管理")
 @AllArgsConstructor
@@ -83,24 +85,26 @@ public class AgentController {
     public Result<Void> save(@RequestBody @Valid AgentCreateDTO dto) {
         AgentEntity entity = ConvertUtils.sourceToTarget(dto, AgentEntity.class);
 
+        // 设置用户ID和创建者信息
+        UserDetail user = SecurityUser.getUser();
+
         // 获取默认模板
         AgentTemplateEntity template = agentTemplateService.getDefaultTemplate();
         if (template != null) {
             // 设置模板中的默认值
+            entity.setAssistantName(template.getAssistantName());
             entity.setAsrModelId(template.getAsrModelId());
             entity.setVadModelId(template.getVadModelId());
             entity.setLlmModelId(template.getLlmModelId());
             entity.setTtsModelId(template.getTtsModelId());
             entity.setTtsVoiceId(template.getTtsVoiceId());
+            entity.setTtsVoiceType(template.getTtsVoiceType());
             entity.setMemModelId(template.getMemModelId());
             entity.setIntentModelId(template.getIntentModelId());
             entity.setSystemPrompt(template.getSystemPrompt());
             entity.setLangCode(template.getLangCode());
             entity.setLanguage(template.getLanguage());
         }
-
-        // 设置用户ID和创建者信息
-        UserDetail user = SecurityUser.getUser();
         entity.setUserId(user.getId());
         entity.setCreator(user.getId());
         entity.setCreatedAt(new Date());
@@ -122,6 +126,9 @@ public class AgentController {
         }
 
         // 只更新提供的非空字段
+        if (dto.getAssistantName() != null) {
+            existingEntity.setAssistantName(dto.getAssistantName());
+        }
         if (dto.getAgentName() != null) {
             existingEntity.setAgentName(dto.getAgentName());
         }
@@ -142,6 +149,9 @@ public class AgentController {
         }
         if (dto.getTtsVoiceId() != null) {
             existingEntity.setTtsVoiceId(dto.getTtsVoiceId());
+        }
+        if (dto.getTtsVoiceType() != null) {
+            existingEntity.setTtsVoiceType(dto.getTtsVoiceType());
         }
         if (dto.getMemModelId() != null) {
             existingEntity.setMemModelId(dto.getMemModelId());
@@ -191,5 +201,4 @@ public class AgentController {
                 .list(new QueryWrapper<AgentTemplateEntity>().orderByAsc("sort"));
         return new Result<List<AgentTemplateEntity>>().ok(list);
     }
-
 }

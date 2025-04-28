@@ -145,6 +145,30 @@ def get_agent_models(
         },
     )
 
+def save_mem_summary(mac_address, client_id, mem_summary):
+    return ManageApiClient._instance._execute_request(
+        "POST",
+        "/config/save-mem-summary",
+        json={
+            "secret": ManageApiClient._secret,
+            "macAddress": mac_address,
+            "clientId": client_id,
+            "memSummary": mem_summary,
+        },
+    )
+
+def save_memory_to_server(mac_address, client_id, memory_data):
+    print("save_memory_to_server")
+    return ManageApiClient._instance._execute_request(
+        "POST",
+        "/config/save-memory-data",
+        json={
+            "secret": ManageApiClient._secret,
+            "macAddress": mac_address,
+            "clientId": client_id,
+            "memoryData": memory_data,
+        },
+    )
 
 def init_service(config):
     ManageApiClient(config)

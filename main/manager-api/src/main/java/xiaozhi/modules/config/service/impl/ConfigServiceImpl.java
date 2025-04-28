@@ -1,33 +1,43 @@
 package xiaozhi.modules.config.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-
-import lombok.AllArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import xiaozhi.common.exception.ErrorCode;
 import xiaozhi.common.exception.RenException;
 import xiaozhi.common.redis.RedisKeys;
 import xiaozhi.common.redis.RedisUtils;
+import xiaozhi.common.user.UserDetail;
 import xiaozhi.common.utils.JsonUtils;
+import xiaozhi.common.utils.Result;
 import xiaozhi.modules.agent.entity.AgentEntity;
 import xiaozhi.modules.agent.entity.AgentTemplateEntity;
 import xiaozhi.modules.agent.service.AgentService;
 import xiaozhi.modules.agent.service.AgentTemplateService;
+import xiaozhi.modules.chat.entity.ChatHistoryEntity;
+import xiaozhi.modules.chat.entity.ChatMessageEntity;
+import xiaozhi.modules.chat.service.ChatHistoryService;
+import xiaozhi.modules.chat.service.ChatMessageService;
+import xiaozhi.modules.config.dto.SaveMemoryDTO;
 import xiaozhi.modules.config.service.ConfigService;
 import xiaozhi.modules.device.entity.DeviceEntity;
 import xiaozhi.modules.device.service.DeviceService;
 import xiaozhi.modules.model.entity.ModelConfigEntity;
 import xiaozhi.modules.model.service.ModelConfigService;
+import xiaozhi.modules.security.user.SecurityUser;
 import xiaozhi.modules.sys.dto.SysParamsDTO;
 import xiaozhi.modules.sys.service.SysParamsService;
+import xiaozhi.modules.timbre.entity.VoiceCloneEntity;
 import xiaozhi.modules.timbre.service.TimbreService;
+import xiaozhi.modules.timbre.service.VoiceCloneService;
 import xiaozhi.modules.timbre.vo.TimbreDetailsVO;
 
+import java.util.*;
+
+@Slf4j
 @Service
 @AllArgsConstructor
 public class ConfigServiceImpl implements ConfigService {
@@ -38,6 +48,9 @@ public class ConfigServiceImpl implements ConfigService {
     private final AgentTemplateService agentTemplateService;
     private final RedisUtils redisUtils;
     private final TimbreService timbreService;
+    private final ChatHistoryService chatHistoryService;
+    private final ChatMessageService chatMessageService;
+    private final VoiceCloneService voiceCloneService;
 
     @Override
     public Object getConfig(Boolean isCache) {
@@ -61,8 +74,9 @@ public class ConfigServiceImpl implements ConfigService {
 
         // 构建模块配置
         buildModuleConfig(
-                agent.getAgentName(),
+                agent.getAssistantName(),
                 agent.getSystemPrompt(),
+                null,
                 null,
                 agent.getVadModelId(),
                 agent.getAsrModelId(),
@@ -99,9 +113,20 @@ public class ConfigServiceImpl implements ConfigService {
         }
         // 获取音色信息
         String voice = null;
-        TimbreDetailsVO timbre = timbreService.get(agent.getTtsVoiceId());
-        if (timbre != null) {
-            voice = timbre.getTtsVoice();
+
+        //判断音色类型，复刻还是官方
+        if (agent.getTtsVoiceType() == 1) {
+            //复刻音色
+            VoiceCloneEntity voiceClone = voiceCloneService.selectById(agent.getTtsVoiceId());
+            if (voiceClone != null) {
+                voice = voiceClone.getTtsVoice();
+            }
+        } else {
+            //官方音色
+            TimbreDetailsVO timbre = timbreService.get(agent.getTtsVoiceId());
+            if (timbre != null) {
+                voice = timbre.getTtsVoice();
+            }
         }
         // 构建返回数据
         Map<String, Object> result = new HashMap<>();
@@ -132,8 +157,9 @@ public class ConfigServiceImpl implements ConfigService {
 
         // 构建模块配置
         buildModuleConfig(
-                agent.getAgentName(),
+                agent.getAssistantName(),
                 agent.getSystemPrompt(),
+                device.getMemSummary(),
                 voice,
                 agent.getVadModelId(),
                 agent.getAsrModelId(),
@@ -147,9 +173,61 @@ public class ConfigServiceImpl implements ConfigService {
         return result;
     }
 
+    @Override
+    public boolean saveMemSummary(String macAddress, String memSummary) {
+        if (StringUtils.isNotBlank(memSummary)) {
+            DeviceEntity device = deviceService.getDeviceByMacAddress(macAddress);
+            if (device == null) {
+                return false;
+            }
+            deviceService.saveMemSummary(device.getId(), memSummary);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean saveMemory(String macAddress, List<SaveMemoryDTO.MemoryDTO> memoryData) {
+        DeviceEntity device = this.deviceService.getDeviceByMacAddress(macAddress);
+        if (ObjectUtils.isEmpty(device)) {
+            log.error("设备不存在，mac:{}", macAddress);
+            return false;
+        }
+
+        ChatHistoryEntity chatHistory = new ChatHistoryEntity();
+        chatHistory.setId(UUID.randomUUID().toString().replace("-", ""));
+        chatHistory.setUserId(device.getUserId());
+        chatHistory.setAgentId(device.getAgentId());
+        chatHistory.setDeviceId(macAddress);
+        chatHistory.setCreator(device.getUserId());
+        chatHistory.setCreateDate(new Date());
+        chatHistory.setMessageCount(memoryData.size());
+        chatHistoryService.insert(chatHistory);
+
+        List<ChatMessageEntity> chatMessages = new ArrayList<>();
+        ChatMessageEntity chatMessage = null;
+        int sort = 0;
+        for (SaveMemoryDTO.MemoryDTO memory : memoryData) {
+            chatMessage = new ChatMessageEntity();
+            sort++;
+            chatMessage.setId(UUID.randomUUID().toString().replace("-", ""));
+            chatMessage.setUserId(device.getUserId());
+            chatMessage.setChatId(chatHistory.getId());
+            chatMessage.setRole(memory.getRole());
+            chatMessage.setContent(memory.getContent());
+            chatMessage.setSort(sort);
+            chatMessage.setCreator(device.getUserId());
+            chatMessage.setCreateDate(memory.getTimestamp());
+            chatMessages.add(chatMessage);
+        }
+        chatMessageService.insertBatch(chatMessages);
+        return true;
+    }
+
     /**
      * 构建配置信息
-     * 
+     *
      * @param paramsList 系统参数列表
      * @return 配置信息
      */
@@ -221,8 +299,9 @@ public class ConfigServiceImpl implements ConfigService {
 
     /**
      * 构建模块配置
-     * 
+     *
      * @param prompt        提示词
+     * @param memSummary    记忆总结
      * @param voice         音色
      * @param vadModelId    VAD模型ID
      * @param asrModelId    ASR模型ID
@@ -235,6 +314,7 @@ public class ConfigServiceImpl implements ConfigService {
     private void buildModuleConfig(
             String assistantName,
             String prompt,
+            String memSummary,
             String voice,
             String vadModelId,
             String asrModelId,
@@ -246,8 +326,8 @@ public class ConfigServiceImpl implements ConfigService {
             boolean isCache) {
         Map<String, String> selectedModule = new HashMap<>();
 
-        String[] modelTypes = { "VAD", "ASR", "TTS", "Memory", "Intent", "LLM" };
-        String[] modelIds = { vadModelId, asrModelId, ttsModelId, memModelId, intentModelId, llmModelId };
+        String[] modelTypes = {"VAD", "ASR", "TTS", "Memory", "Intent", "LLM"};
+        String[] modelIds = {vadModelId, asrModelId, ttsModelId, memModelId, intentModelId, llmModelId};
         String intentLLMModelId = null;
 
         for (int i = 0; i < modelIds.length; i++) {
@@ -294,5 +374,9 @@ public class ConfigServiceImpl implements ConfigService {
             prompt = prompt.replace("{{assistant_name}}", StringUtils.isBlank(assistantName) ? "小智" : assistantName);
         }
         result.put("prompt", prompt);
+
+        if (StringUtils.isNotBlank(memSummary)) {
+            result.put("mem_summary", memSummary);
+        }
     }
 }

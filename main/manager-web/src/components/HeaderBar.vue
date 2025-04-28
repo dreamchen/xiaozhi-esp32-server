@@ -20,6 +20,12 @@
             :style="{ filter: $route.path === '/model-config' ? 'brightness(0) invert(1)' : 'None' }" />
           模型配置
         </div>
+        <div class="equipment-management" :class="{ 'active-tab': $route.path === '/voiceClone-management' }"
+          @click="goVoiceCloneManagement">
+          <img loading="lazy" alt="" src="@/assets/header/model_config.png"
+            :style="{ filter: $route.path === '/voiceClone-management' ? 'brightness(0) invert(1)' : 'None' }" />
+          声音复刻
+        </div>
         <div v-if="isSuperAdmin" class="equipment-management"
           :class="{ 'active-tab': $route.path === '/user-management' }" @click="goUserManagement">
           <img loading="lazy" alt="" src="@/assets/header/user_management.png"
@@ -107,6 +113,9 @@ export default {
     },
     goModelConfig() {
       this.$router.push('/model-config')
+    },
+    goVoiceCloneManagement() {
+      this.$router.push('/voiceClone-management')
     },
     goParamManagement() {
       this.$router.push('/params-management')

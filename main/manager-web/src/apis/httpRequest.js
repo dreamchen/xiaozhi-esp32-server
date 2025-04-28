@@ -112,7 +112,7 @@ function httpHandlerError(info, callBack) {
             return true
         } else {
             showDanger(info.data.msg)
-            return true
+            return false
         }
     }
     if (callBack) {

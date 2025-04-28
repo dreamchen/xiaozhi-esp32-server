@@ -19,21 +19,29 @@
     <div class="device-name">
       音色模型：{{ device.ttsVoiceName }}
     </div>
-    <div style="display: flex;gap: 10px;align-items: center;">
+    <div class="version-info">
+      最近对话：{{ formatDate(device.lastConnectedAt) }}
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-top: 10px;">
       <div class="settings-btn" @click="handleConfigure">
         配置角色
+      </div>
+      <!-- <div class="settings-btn" disabled>
+        声纹识别
+      </div> -->
+      <div class="settings-btn" @click="handleChatHistory">
+        聊天记录
       </div>
       <div class="settings-btn" @click="handleDeviceManage">
         设备管理({{ device.deviceCount }})
       </div>
     </div>
-    <div class="version-info">
-      <div>最近对话：{{ device.lastConnectedAt }}</div>
-    </div>
   </div>
 </template>
 
 <script>
+import { formatDate } from "@/utils/format";
+
 export default {
   name: 'DeviceItem',
   props: {
@@ -49,18 +57,21 @@ export default {
     handleConfigure() {
       this.$router.push({ path: '/role-config', query: { agentId: this.device.agentId } });
     },
+    handleChatHistory() {
+      this.$router.push({ path: '/chat-history', query: { agentId: this.device.agentId,agentName: this.device.agentName } });
+    },
     handleDeviceManage() {
       this.$router.push({ path: '/device-management', query: { agentId: this.device.agentId } });
-    }
+    },
+    formatDate
   }
 }
 </script>
 <style scoped>
 .device-item {
-  width: 342px;
   border-radius: 20px;
   background: #fafcfe;
-  padding: 22px;
+  padding: 20px;
   box-sizing: border-box;
 }
 
@@ -69,6 +80,14 @@ export default {
   font-weight: 400;
   font-size: 11px;
   color: #3d4566;
+  text-align: left;
+}
+
+.version-info {
+  margin: 7px 0 10px;
+  font-weight: 400;
+  font-size: 11px;
+  color: #979db1;
   text-align: left;
 }
 
@@ -83,15 +102,6 @@ export default {
   line-height: 21px;
   cursor: pointer;
   border-radius: 14px;
-}
-
-.version-info {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
-  font-size: 12px;
-  color: #979db1;
-  font-weight: 400;
 }
 </style>
 

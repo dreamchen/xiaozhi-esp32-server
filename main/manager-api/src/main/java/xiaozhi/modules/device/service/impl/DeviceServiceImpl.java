@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -237,6 +238,17 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
         return baseDao.selectOne(wrapper);
     }
 
+    @Override
+    public void saveMemSummary(String id, String memSummary) {
+        if (StringUtils.isNotBlank(id) && StringUtils.isNotBlank(memSummary)) {
+            UpdateWrapper<DeviceEntity> wrapper = new UpdateWrapper<>();
+            wrapper.eq("id", id);
+            wrapper.set("mem_summary", memSummary);
+            wrapper.set("last_connected_at", new Date());
+            baseDao.update(wrapper);
+        }
+    }
+
     private DeviceReportRespDTO.ServerTime buildServerTime() {
         DeviceReportRespDTO.ServerTime serverTime = new DeviceReportRespDTO.ServerTime();
         TimeZone tz = TimeZone.getDefault();
@@ -254,6 +266,19 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
         if (cacheMap != null && cacheMap.containsKey("activation_code")) {
             String cachedCode = (String) cacheMap.get("activation_code");
             return cachedCode;
+        }
+        return null;
+    }
+
+    @Override
+    public Date getLastConnectedAt(String agentId) {
+        QueryWrapper<DeviceEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("agent_id", agentId);
+        wrapper.orderByDesc("last_connected_at");
+        wrapper.last("LIMIT 1");
+        DeviceEntity deviceEntity = baseDao.selectOne(wrapper);
+        if(ObjectUtils.isNotEmpty(deviceEntity)){
+            return deviceEntity.getLastConnectedAt();
         }
         return null;
     }

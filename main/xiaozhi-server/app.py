@@ -35,6 +35,8 @@ async def main():
     check_ffmpeg_installed()
     config = load_config()
 
+    print(f"启动服务, config: {config}")
+
     # 启动 WebSocket 服务器
     ws_server = WebSocketServer(config)
     ws_task = asyncio.create_task(ws_server.start())

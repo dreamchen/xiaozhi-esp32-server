@@ -18,7 +18,7 @@
             <el-table ref="deviceTable" :data="paginatedDeviceList" class="transparent-table"
               :header-cell-class-name="headerCellClassName" v-loading="loading" element-loading-text="拼命加载中"
               element-loading-spinner="el-icon-loading" element-loading-background="rgba(255, 255, 255, 0.7)">
-              <el-table-column label="选择" align="center" width="120">
+              <el-table-column label="选择" align="center" width="60">
                 <template slot-scope="scope">
                   <el-checkbox v-model="scope.row.selected"></el-checkbox>
                 </template>
@@ -28,10 +28,27 @@
                   {{ getFirmwareTypeName(scope.row.model) }}
                 </template>
               </el-table-column>
-              <el-table-column label="固件版本" prop="firmwareVersion" align="center"></el-table-column>
-              <el-table-column label="Mac地址" prop="macAddress" align="center"></el-table-column>
-              <el-table-column label="绑定时间" prop="bindTime" align="center"></el-table-column>
-              <el-table-column label="最近对话" prop="lastConversation" align="center"></el-table-column>
+              <el-table-column label="固件版本" prop="firmwareVersion" align="center" width="80"></el-table-column>
+              <el-table-column label="Mac地址" prop="macAddress" align="center" width="140"></el-table-column>
+              <el-table-column label="绑定时间" prop="bindTime" align="center" width="160"></el-table-column>
+              <el-table-column label="最近对话" prop="lastConversation" align="center" width="160"></el-table-column>
+              <el-table-column label="记忆体" prop="memSummary" align="center">
+                <template slot-scope="scope">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <el-tooltip popper-class="custom-tooltip" placement="top">
+                    <template #content>
+                      <div style="max-width: 400px; max-height: 150px; overflow: auto;">
+                        {{ scope.row.memSummary }}
+                      </div>
+                    </template>
+                    <span style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{ scope.row.memSummary }}</span>
+                  </el-tooltip>
+                  <el-popconfirm title="确定要删除记忆吗？" @confirm="handleDelMemSummary(scope.row)">
+                    <i slot="reference" class="el-icon-delete" style="cursor: pointer; color: red;"></i>
+                  </el-popconfirm>
+                </div>
+                </template>
+              </el-table-column>
               <el-table-column label="备注" align="center">
                 <template slot-scope="scope">
                   <el-input v-if="scope.row.isEdit" v-model="scope.row.remark" size="mini"
@@ -45,13 +62,13 @@
                   </span>
                 </template>
               </el-table-column>
-              <el-table-column label="OTA升级" align="center">
+              <el-table-column label="OTA升级" align="center" width="80">
                 <template slot-scope="scope">
                   <el-switch v-model="scope.row.otaSwitch" size="mini" active-color="#13ce66" inactive-color="#ff4949"
                     @change="handleOtaSwitchChange(scope.row)"></el-switch>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" align="center">
+              <el-table-column label="操作" align="center" width="60">
                 <template slot-scope="scope">
                   <el-button size="mini" type="text" @click="handleUnbind(scope.row.device_id)">
                     解绑
@@ -296,6 +313,7 @@ export default {
               macAddress: device.macAddress,
               bindTime: formattedBindTime,
               lastConversation: formattedLastConversation,
+              memSummary: device.memSummary,
               remark: device.alias,
               isEdit: false,
               otaSwitch: device.autoUpdate === 1,
@@ -326,6 +344,16 @@ export default {
           this.$message.success(row.otaSwitch ? '已设置成自动升级' : '已关闭自动升级')
         } else {
           row.otaSwitch = !row.otaSwitch
+          this.$message.error(data.msg || '操作失败')
+        }
+      })
+    },
+    handleDelMemSummary(row) {
+      Api.device.delMemSummary(row.device_id, ({ data }) => {
+        if (data.code === 0) {
+          this.$message.success('删除记忆总结成功')
+          this.fetchBindDevices(this.$route.query.agentId)
+        } else {
           this.$message.error(data.msg || '操作失败')
         }
       })

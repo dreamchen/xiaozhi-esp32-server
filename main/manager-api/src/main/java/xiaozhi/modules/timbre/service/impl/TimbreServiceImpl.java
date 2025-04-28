@@ -1,19 +1,13 @@
 package xiaozhi.modules.timbre.service.impl;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import cn.hutool.core.collection.CollectionUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-
-import cn.hutool.core.collection.CollectionUtil;
-import lombok.AllArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 import xiaozhi.common.constant.Constant;
 import xiaozhi.common.page.PageData;
 import xiaozhi.common.redis.RedisKeys;
@@ -26,11 +20,17 @@ import xiaozhi.modules.timbre.dto.TimbreDataDTO;
 import xiaozhi.modules.timbre.dto.TimbrePageDTO;
 import xiaozhi.modules.timbre.entity.TimbreEntity;
 import xiaozhi.modules.timbre.service.TimbreService;
+import xiaozhi.modules.timbre.util.BaseVoiceClone;
 import xiaozhi.modules.timbre.vo.TimbreDetailsVO;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 音色的业务层的实现
- * 
+ *
  * @author zjy
  * @since 2025-3-21
  */

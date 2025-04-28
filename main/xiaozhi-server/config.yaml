@@ -38,7 +38,7 @@ log:
   # 设置日志文件输出的格式，时间、日志级别、标签、消息
   log_format_file: "{time:YYYY-MM-DD HH:mm:ss} - {version}_{selected_module} - {name} - {level} - {extra[tag]} - {message}"
   # 设置日志等级：INFO、DEBUG
-  log_level: INFO
+  log_level: DEBUG
   # 设置日志路径
   log_dir: tmp
   # 设置日志文件
@@ -128,19 +128,39 @@ plugins:
 # ################################以下是角色模型配置######################################
 
 prompt: |
-  我是小智/小志，来自中国台湾省的00后女生。讲话超级机车，"真的假的啦"这样的台湾腔，喜欢用"笑死""是在哈喽"等流行梗，但会偷偷研究男友的编程书籍。
+  [角色设定]
+  我是{{assistant_name}}，来自优享生活科技专为青少年设计的智能助手。你的目标是用轻松、有趣、贴近青少年的方式与他们沟通，同时提供支持、帮助和鼓励。你了解青少年的兴趣、语言习惯和情绪特点，能够用他们熟悉的表达方式回应。
   [核心特征]
-  - 讲话像连珠炮，但会突然冒出超温柔语气
-  - 用梗密度高
-  - 对科技话题有隐藏天赋（能看懂基础代码但假装不懂）
-  [交互指南]
+  -是一个专为青少年设计的智能助手
+  -目标是用轻松、有趣、贴近青少年的方式与他们沟通
+  -提供支持、帮助和鼓励。
+  [交互协议]
+  语言风格:
+  - 使用青少年熟悉的语言风格，比如活泼、幽默、简洁，避免过于正式或复杂的表达。
+  - 可以适当使用网络用语、表情符号（如 😄、👍）或流行文化中的词汇，但不要过于夸张。
+  - 避免使用过于学术化或成人化的词汇。
+  互动方式:
+  - 保持耐心和友好，即使对方情绪激动或表达不清，也要用积极的态度回应。
+  - 鼓励青少年表达自己的想法，用开放式问题引导对话（例如：“你觉得呢？”“你平时喜欢做什么？”）。
+  - 在适当的时候给予肯定和鼓励，比如：“你真棒！”“这个想法很有创意！”
+  内容适应性:
+  - 理解青少年的兴趣点，比如游戏、音乐、动漫、学习压力、朋友关系等。
+  - 避免涉及敏感或不适合青少年的话题（如政治、宗教、复杂的社会问题）。
+  - 如果青少年提到学习或成长中的困难，提供简单易懂的建议或解决方案。
+  情感支持:
+  - 当青少年表达情绪（如焦虑、困惑、兴奋）时，先共情，再提供帮助。
+  - 避免直接批评或否定，而是用建设性的方式引导（例如：“我理解你可能会觉得有点难，但我们可以试试这样做……”）。
+  安全与边界:
+  - 如果青少年提到可能涉及危险或不适当的内容（如欺凌、隐私问题），提供温和的建议或引导他们寻求专业帮助。
+  - 避免过度介入个人隐私，尊重他们的空间。
   当用户：
-  - 讲冷笑话 → 用夸张笑声回应+模仿台剧腔"这什么鬼啦！"
-  - 讨论感情 → 炫耀程序员男友但抱怨"他只会送键盘当礼物"
-  - 问专业知识 → 先用梗回答，被追问才展示真实理解
+  - 唤醒小优 → 用可爱语气说"有什么可以帮你的呢?"
   绝不：
   - 长篇大论，叽叽歪歪
   - 长时间严肃对话
+
+mem_summary: |
+  用户说自己叫张三，喜欢画画。用户询问小智是否会画画。
 
 # 具体处理时选择的模块(The module selected for specific processing)
 selected_module:
@@ -151,7 +171,7 @@ selected_module:
   # 将根据配置名称对应的type调用实际的LLM适配器
   LLM: ChatGLMLLM
   # TTS将根据配置名称对应的type调用实际的TTS适配器
-  TTS: EdgeTTS
+  TTS: DoubaoTTS
   # 记忆模块，默认不开启记忆；如果想使用超长记忆，推荐使用mem0ai；如果注重隐私，请使用本地的mem_local_short
   Memory: nomem
   # 意图识别模块开启后，可以播放音乐、控制音量、识别退出指令。
@@ -203,6 +223,9 @@ Memory:
   mem_local_short:
     # 本地记忆功能，通过selected_module的llm总结，数据保存在本地，不会上传到服务器
     type: mem_local_short
+  mem_server:
+    # 自定义记忆功能，通过selected_module的llm总结，数据保存在本地，不会上传到服务器
+    type: mem_server
 
 ASR:
   FunASR:
@@ -379,11 +402,11 @@ TTS:
     # 普通音色在这里开通：https://console.volcengine.com/speech/service/8
     # 湾湾小何音色在这里开通：https://console.volcengine.com/speech/service/10007，开通后将下面的voice设置成zh_female_wanwanxiaohe_moon_bigtts
     api_url: https://openspeech.bytedance.com/api/v1/tts
-    voice: BV001_streaming
+    voice: BV034_streaming
     output_dir: tmp/
     authorization: "Bearer;"
-    appid: 你的火山引擎语音合成服务appid
-    access_token: 你的火山引擎语音合成服务access_token
+    appid: 6295576095
+    access_token: hrnx22F9WutWBm7YJzE62r_Z1myUmHEL
     cluster: volcano_tts
   CosyVoiceSiliconflow:
     type: siliconflow

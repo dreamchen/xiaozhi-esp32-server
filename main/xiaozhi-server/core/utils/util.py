@@ -291,6 +291,7 @@ def initialize_modules(
         modules["memory"] = memory.create_instance(
             memory_type,
             config["Memory"][select_memory_module],
+            config.get("read_config_from_api", False)
         )
         logger.bind(tag=TAG).info(f"初始化组件: memory成功 {select_memory_module}")
 
@@ -328,4 +329,8 @@ def initialize_modules(
         modules["prompt"] = config["prompt"]
         logger.bind(tag=TAG).info(f"初始化组件: prompt成功 {modules['prompt'][:50]}...")
 
+    # 初始化自定义mem_summary
+    if config.get("mem_summary", None) is not None:
+        modules["mem_summary"] = config["mem_summary"]
+        logger.bind(tag=TAG).info(f"初始化组件: mem_summary成功 {modules['mem_summary'][:50]}...")
     return modules

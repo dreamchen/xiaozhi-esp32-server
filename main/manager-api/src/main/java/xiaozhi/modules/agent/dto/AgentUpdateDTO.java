@@ -21,6 +21,9 @@ public class AgentUpdateDTO implements Serializable {
     @Schema(description = "智能体名称", example = "客服助手", required = false)
     private String agentName;
 
+    @Schema(description = "助手名称", example = "小智", required = false)
+    private String assistantName;
+
     @Schema(description = "语音识别模型标识", example = "asr_model_02", required = false)
     private String asrModelId;
 
@@ -35,6 +38,9 @@ public class AgentUpdateDTO implements Serializable {
 
     @Schema(description = "音色标识", example = "voice_02", required = false)
     private String ttsVoiceId;
+
+    @Schema(description = "音色标识类型：0：官方、1：复刻", example = "0", required = false)
+    private Integer ttsVoiceType;
 
     @Schema(description = "记忆模型标识", example = "mem_model_02", required = false)
     private String memModelId;

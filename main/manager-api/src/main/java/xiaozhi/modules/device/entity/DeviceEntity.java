@@ -37,6 +37,9 @@ public class DeviceEntity {
     @Schema(description = "设备硬件型号")
     private String board;
 
+    @Schema(description = "记忆总结")
+    private String memSummary;
+
     @Schema(description = "设备别名")
     private String alias;
 
