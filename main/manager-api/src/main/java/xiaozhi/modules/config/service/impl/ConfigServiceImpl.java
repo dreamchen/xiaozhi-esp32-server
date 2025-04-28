@@ -75,7 +75,7 @@ public class ConfigServiceImpl implements ConfigService {
         // 构建模块配置
         buildModuleConfig(
                 agent.getAssistantName(),
-                agent.getSystemPrompt(),
+                null,
                 null,
                 null,
                 agent.getVadModelId(),
