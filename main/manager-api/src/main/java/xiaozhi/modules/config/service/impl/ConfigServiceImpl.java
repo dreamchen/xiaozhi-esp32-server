@@ -228,7 +228,7 @@ public class ConfigServiceImpl implements ConfigService {
     /**
      * 构建配置信息
      *
-     * @param paramsList 系统参数列表
+     * @param config 系统参数列表
      * @return 配置信息
      */
     @SuppressWarnings("unchecked")

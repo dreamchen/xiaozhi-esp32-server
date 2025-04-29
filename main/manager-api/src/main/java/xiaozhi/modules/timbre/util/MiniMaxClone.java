@@ -27,7 +27,7 @@ public class MiniMaxClone extends BaseVoiceClone {
     private VoiceCloneDao voiceCloneDao;
 
     @Value("tts.miniMax.demoText")
-    private String demoTxt;
+    private String demoText;
 
     @Value("${tts.miniMax.apiKey}")
     private String apiKey;
@@ -109,7 +109,7 @@ public class MiniMaxClone extends BaseVoiceClone {
 
         String bodyContent = "{\n" +
                 "            \"model\":\"speech-02-turbo\",\n" +
-                "            \"text\":\"" + demoTxt + "\",\n" +
+                "            \"text\":\"" + demoText + "\",\n" +
                 "            \"stream\":false,\n" +
                 "            \"voice_setting\":{\n" +
                 "                \"voice_id\":\"" + voiceId + "\",\n" +
@@ -281,7 +281,7 @@ public class MiniMaxClone extends BaseVoiceClone {
                     "                \"voice_id\": \"" + voiceId + "\",\n" +
                     "                \"model\": \"speech-02-turbo\",\n" +
                     "                \"accuracy\": 0.8,\n" +
-                    "                \"text\": \"" + demoTxt + "\"\n" +
+                    "                \"text\": \"" + demoText + "\"\n" +
                     "            }";
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .connectTimeout(10, TimeUnit.SECONDS)  // 设置连接超时为10秒

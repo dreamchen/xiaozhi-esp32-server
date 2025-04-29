@@ -1,0 +1,60 @@
+knife4j:
+  production: false
+  enable: true
+  basic:
+    enable: false
+    username: renren
+    password: 2ZABCDEUgF
+  setting:
+    enableFooter: false
+spring:
+  datasource:
+    druid:
+      #MySQL
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://8.141.27.154:3306/xiaozhi?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+      username: root
+      password: Youxlife0630
+      initial-size: 10
+      max-active: 100
+      min-idle: 10
+      max-wait: 6000
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      stat-view-servlet:
+        enabled: false
+      filter:
+        stat:
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: false
+        wall:
+          config:
+            multi-statement-allow: true
+  data:
+    redis:
+      host: 8.141.27.154         # Redis服务器地址
+      port: 6379              # Redis服务器连接端口
+      password: Youxlife0630 # Redis服务器连接密码（默认为空）
+      database: 0            # Redis数据库索引（默认为0）
+      timeout: 10000ms       # 连接超时时间（毫秒）
+      lettuce:
+        pool:
+          max-active: 8      # 连接池最大连接数（使用负值表示没有限制）
+          max-idle: 8        # 连接池中的最大空闲连接
+          min-idle: 0        # 连接池中的最小空闲连接
+        shutdown-timeout: 100ms  # 客户端优雅关闭的等待时间
+
+tts:
+  miniMax:
+    demoText: 你好，我是小优，来自优享生活AI的智能助手，有什么可以帮您的？
+    apiKey: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJHcm91cE5hbWUiOiLkvJjkuqvnp5HmioAiLCJVc2VyTmFtZSI6IuS8mOS6q-enkeaKgCIsIkFjY291bnQiOiIiLCJTdWJqZWN0SUQiOiIxOTA4ODAxNDI0OTY0MTk0NTA1IiwiUGhvbmUiOiIxODUwMDAzMjgxOCIsIkdyb3VwSUQiOiIxOTA4ODAxNDI0OTU1ODA1ODk3IiwiUGFnZU5hbWUiOiIiLCJNYWlsIjoiIiwiQ3JlYXRlVGltZSI6IjIwMjUtMDQtMjQgMTc6MTI6NDYiLCJUb2tlblR5cGUiOjEsImlzcyI6Im1pbmltYXgifQ.iOp5AsThWA9eO97Ogzy-iXMP06SZGoNWqiIaTPzZlsxzVaCQRDr7bJVzJ-gNYlfnf74_JWAMDovA4yMKhQphvWFb4u1RQT4eNnKjv_P8Iq9wBOxAauvltWYlw0ovZVVuUJzdn4--mRThl3ds3H90OuiucEHTS_EGVoD230w-HogezsI6ImiUVTizA9Bg6_kOUndd-n3pv1SWY_9wpFL9Z4XLIYZ58LagmpTJ7MB5knvDcgQrD703yjCtYG3RyyZpgVcGRAhBD7MBaCM0Z9OooxGHDF3xQ4-AVrVLfyAzAXTwsM1znOPeDCLR45PfD_67gK_2ThZFLSGYMleIX2Ls0A
+    groupId: 1908801424955805897
+#    apiKey: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJHcm91cE5hbWUiOiLkvJjkuqvnlJ_mtLvvvIjljJfkuqzvvInnp5HmioDmnInpmZDlhazlj7giLCJVc2VyTmFtZSI6IuS8mOS6q-eUn-a0u--8iOWMl-S6rO-8ieenkeaKgOaciemZkOWFrOWPuCIsIkFjY291bnQiOiIiLCJTdWJqZWN0SUQiOiIxOTA4NzcwMjMxNzQ5MTg1NzU2IiwiUGhvbmUiOiIxODYwMDgwNjE2NCIsIkdyb3VwSUQiOiIxOTA4NzcwMjMxNzQwNzk3MTQ4IiwiUGFnZU5hbWUiOiIiLCJNYWlsIjoiIiwiQ3JlYXRlVGltZSI6IjIwMjUtMDQtMjQgMTc6MzM6MTYiLCJUb2tlblR5cGUiOjEsImlzcyI6Im1pbmltYXgifQ.UHo-VIF4wOXbqOneljKsJMw9DpcDSw5OcOgRwx2tYH8DYB3AwbpBLNNMJvvWpmK44--Zp2kBsKK2RUO-eFlGg8qzHeKSMy9dRc7MpNDqhQKsdYn46EjDxVLN8TRl4rTe8kLECJ7hDFAyjMqRFAm7LDOHar56SG1MTadB-4WcBOuEmy-zJJzSLROTfGuSc7gBVqKMzthmGsNYb2MgrC9UENkbuDhbwO8bL0x8uL2mV4hnLmpnORopEoV2acasIgxsqE15YemadfHOr0_ELHg0yxDbfDaC7Mb0iXRryl8PJY6ussgxZxRUnUacPC_uG1HSj0AUgJvZit9NsQIgSxd-Jg
+#    groupId: 1908770231740797148
+    ttsModelId: TTS_MinimaxTTS

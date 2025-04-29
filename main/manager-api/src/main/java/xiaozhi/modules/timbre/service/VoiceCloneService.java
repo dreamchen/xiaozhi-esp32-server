@@ -38,4 +38,11 @@ public interface VoiceCloneService extends BaseService<VoiceCloneEntity> {
 
 
     boolean update(VoiceCloneEntity entity);
+
+    /**
+     * 根据复刻ID获取复刻名称
+     * @param id
+     * @return
+     */
+    String getVoiceCloneNameById(String id);
 }

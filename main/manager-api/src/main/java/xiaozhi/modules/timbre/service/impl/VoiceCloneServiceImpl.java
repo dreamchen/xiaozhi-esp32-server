@@ -45,6 +45,9 @@ public class VoiceCloneServiceImpl extends BaseServiceImpl<VoiceCloneDao, VoiceC
         params.put(Constant.PAGE, dto.getPage());
         params.put(Constant.LIMIT, dto.getLimit());
         QueryWrapper<VoiceCloneEntity> qw = new QueryWrapper<VoiceCloneEntity>().eq("creator", user.getId());
+        if (StringUtils.isNotBlank(dto.getTtsModelId())) {
+            qw.eq("tts_model_id", dto.getTtsModelId());
+        }
         if (ObjectUtils.isNotEmpty(dto.getIsDelete())) {
             qw.eq("is_delete", dto.getIsDelete());
         }
@@ -88,5 +91,17 @@ public class VoiceCloneServiceImpl extends BaseServiceImpl<VoiceCloneDao, VoiceC
     public boolean update(VoiceCloneEntity entity) {
         int count = this.voiceCloneDao.update(entity, new QueryWrapper<VoiceCloneEntity>().eq("id", entity.getId()));
         return count > 0;
+    }
+
+    @Override
+    public String getVoiceCloneNameById(String id) {
+        if (StringUtils.isBlank(id)) {
+            return null;
+        }
+        VoiceCloneEntity entity = this.voiceCloneDao.selectById(id);
+        if (entity != null) {
+            return entity.getName();
+        }
+        return null;
     }
 }

@@ -272,7 +272,6 @@ export default {
     applyTemplateData(templateData) {
       this.form = {
         ...this.form,
-        agentName: templateData.agentName || this.form.agentName,
         assistantName: templateData.assistantName || this.form.assistantName,
         ttsVoiceId: templateData.ttsVoiceId || this.form.ttsVoiceId,
         ttsVoiceType: templateData.ttsVoiceType || this.form.ttsVoiceType,
@@ -287,6 +286,7 @@ export default {
           intentModelId: templateData.intentModelId || this.form.model.intentModelId
         }
       };
+      this.fetchVoiceOptions(templateData.ttsModelId);
     },
     fetchAgentConfig(agentId) {
       Api.agent.getDeviceConfig(agentId, ({data}) => {
@@ -339,7 +339,7 @@ export default {
         }
       });
       //获取自定义音色
-      Api.timbre.getCloneList({modelId: modelId, page:1, limit: 100}, ({data}) => {
+      Api.timbre.getCloneList({ttsModelId: modelId, page:1, limit: 100}, ({data}) => {
         if (data.code === 0 && data.data) {
           let _voiceOptions = data.data.list.map(voice => ({
             value: voice.id,

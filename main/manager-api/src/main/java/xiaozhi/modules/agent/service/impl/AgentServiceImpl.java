@@ -24,6 +24,7 @@ import xiaozhi.modules.agent.service.AgentService;
 import xiaozhi.modules.device.service.DeviceService;
 import xiaozhi.modules.model.service.ModelConfigService;
 import xiaozhi.modules.timbre.service.TimbreService;
+import xiaozhi.modules.timbre.service.VoiceCloneService;
 
 @Service
 public class AgentServiceImpl extends BaseServiceImpl<AgentDao, AgentEntity> implements AgentService {
@@ -40,6 +41,8 @@ public class AgentServiceImpl extends BaseServiceImpl<AgentDao, AgentEntity> imp
 
     @Autowired
     private RedisUtils redisUtils;
+    @Autowired
+    private VoiceCloneService voiceCloneService;
 
     public AgentServiceImpl(AgentDao agentDao) {
         this.agentDao = agentDao;
@@ -103,7 +106,13 @@ public class AgentServiceImpl extends BaseServiceImpl<AgentDao, AgentEntity> imp
             dto.setLlmModelName(modelConfigService.getModelNameById(agent.getLlmModelId()));
 
             // 获取 TTS 音色名称
-            dto.setTtsVoiceName(timbreModelService.getTimbreNameById(agent.getTtsVoiceId()));
+            if(agent.getTtsVoiceType()==0) {
+                // 官方
+                dto.setTtsVoiceName(timbreModelService.getTimbreNameById(agent.getTtsVoiceId()));
+            }else{
+                // 复刻
+                dto.setTtsVoiceName(voiceCloneService.getVoiceCloneNameById(agent.getTtsVoiceId()));
+            }
 
             dto.setLastConnectedAt(deviceService.getLastConnectedAt(agent.getId()));
 

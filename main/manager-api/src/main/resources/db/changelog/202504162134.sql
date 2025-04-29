@@ -12,7 +12,13 @@ ALTER TABLE `ai_agent` ADD COLUMN `tts_voice_type` TINYINT DEFAULT 0 COMMENT 'TT
 ALTER TABLE `ai_chat_message` ADD COLUMN `sort` INT COMMENT '排序' after `content`;
 
 -- 对设备添加记忆总结字段
-ALTER TABLE `ai_device` ADD COLUMN `mem_summary` TEXT DEFAULT '' COMMENT '记忆总结' after `alias`;
+ALTER TABLE `ai_device` ADD COLUMN `mem_summary` TEXT COMMENT '记忆总结' after `alias`;
+
+
+-- 添加服务端长期记忆配置
+INSERT INTO `ai_model_config` VALUES ('Memory_mem_server', 'Memory', 'mem_server', '服务端长期记忆', 0, 1, '{\"type\": \"mem_server\"}', NULL, NULL, 4, NULL, NULL, NULL, NULL);
+
+
 
 -- 声音复刻表
 DROP TABLE IF EXISTS `ai_voice_clone`;
