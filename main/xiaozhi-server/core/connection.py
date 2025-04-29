@@ -57,6 +57,7 @@ class ConnectionHandler:
         self.client_ip_info = {}
         self.session_id = None
         self.prompt = None
+        self.mem_summary = None
         self.welcome_msg = None
         self.max_output_size = 0
 
@@ -196,6 +197,7 @@ class ConnectionHandler:
     async def _save_and_close(self, ws):
         """保存记忆并关闭连接"""
         try:
+            await self.memory.set_mem_summary(self.dialogue.dialogue)
             await self.memory.save_memory(self.dialogue.dialogue)
         except Exception as e:
             self.logger.bind(tag=TAG).error(f"保存记忆失败: {e}")
@@ -216,11 +218,13 @@ class ConnectionHandler:
 
     def _initialize_components(self, private_config):
         """初始化组件"""
+        print(f"_initialize_components private_config: {private_config}")
         if private_config is not None:
             self._initialize_models(private_config)
         else:
             self.prompt = self.config["prompt"]
             self.change_system_prompt(self.prompt)
+            self.mem_summary = self.config["mem_summary"]
         """加载记忆"""
         self._initialize_memory()
         """加载意图识别"""
@@ -348,11 +352,15 @@ class ConnectionHandler:
             self.intent = modules["intent"]
         if modules.get("memory", None) is not None:
             self.memory = modules["memory"]
+        if modules.get("mem_summary", None) is not None:
+            self.mem_summary = modules["mem_summary"]
+
 
     def _initialize_memory(self):
         """初始化记忆模块"""
         device_id = self.headers.get("device-id", None)
         self.memory.init_memory(device_id, self.llm)
+        self.memory.load_mem_summary(self.mem_summary)
 
     def _initialize_intent(self):
         if (
