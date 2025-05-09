@@ -119,7 +119,8 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
 
         DeviceEntity deviceById = getDeviceByMacAddress(macAddress);
 
-        if (deviceById == null || deviceById.getAutoUpdate() != 0) {
+        // 只有在设备已绑定且autoUpdate不为0的情况下才返回固件升级信息
+        if (deviceById != null && deviceById.getAutoUpdate() != 0) {
             String type = deviceReport.getBoard() == null ? null : deviceReport.getBoard().getType();
             DeviceReportRespDTO.Firmware firmware = buildFirmwareInfo(type,
                     deviceReport.getApplication() == null ? null : deviceReport.getApplication().getVersion());
@@ -271,16 +272,17 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
     }
 
     @Override
-    public Date getLastConnectedAt(String agentId) {
-        QueryWrapper<DeviceEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("agent_id", agentId);
-        wrapper.orderByDesc("last_connected_at");
-        wrapper.last("LIMIT 1");
-        DeviceEntity deviceEntity = baseDao.selectOne(wrapper);
-        if(ObjectUtils.isNotEmpty(deviceEntity)){
-            return deviceEntity.getLastConnectedAt();
+    public Date getLatestLastConnectionTime(String agentId) {
+        // 查询是否有缓存时间，有则返回
+        Date cachedDate = (Date) redisUtils.get(RedisKeys.getAgentDeviceLastConnectedAtById(agentId));
+        if (cachedDate != null) {
+            return cachedDate;
         }
-        return null;
+        Date maxDate = deviceDao.getAllLastConnectedAtByAgentId(agentId);
+        if (maxDate != null) {
+            redisUtils.set(RedisKeys.getAgentDeviceLastConnectedAtById(agentId), maxDate);
+        }
+        return maxDate;
     }
 
     private String getDeviceCacheKey(String deviceId) {

@@ -117,7 +117,6 @@
 import Api from '@/apis/api';
 import AddDeviceDialog from "@/components/AddDeviceDialog.vue";
 import HeaderBar from "@/components/HeaderBar.vue";
-import { FIRMWARE_TYPES } from "@/utils";
 
 export default {
   components: { HeaderBar, AddDeviceDialog },
@@ -135,6 +134,7 @@ export default {
       deviceList: [],
       loading: false,
       userApi: null,
+      firmwareTypes: [],
     };
   },
   computed: {
@@ -180,7 +180,19 @@ export default {
       this.fetchBindDevices(agentId);
     }
   },
+  created() {
+    this.getFirmwareTypes()
+  },
   methods: {
+    async getFirmwareTypes() {
+      try {
+        const res = await Api.dict.getDictDataByType('FIRMWARE_TYPE')
+        this.firmwareTypes = res.data
+      } catch (error) {
+        console.error('获取固件类型失败:', error)
+        this.$message.error(error.message || '获取固件类型失败')
+      }
+    },
     handlePageSizeChange(val) {
       this.pageSize = val;
       this.currentPage = 1;
@@ -299,20 +311,13 @@ export default {
         this.loading = false;
         if (data.code === 0) {
           this.deviceList = data.data.map(device => {
-            const bindDate = new Date(device.createDate);
-            const formattedBindTime = `${bindDate.getFullYear()}-${(bindDate.getMonth() + 1).toString().padStart(2, '0')}-${bindDate.getDate().toString().padStart(2, '0')} ${bindDate.getHours().toString().padStart(2, '0')}:${bindDate.getMinutes().toString().padStart(2, '0')}:${bindDate.getSeconds().toString().padStart(2, '0')}`;
-            let formattedLastConversation = '';
-            if (device.lastConnectedAt) {
-              const lastConvoDate = new Date(device.lastConnectedAt);
-              formattedLastConversation = `${lastConvoDate.getFullYear()}-${(lastConvoDate.getMonth() + 1).toString().padStart(2, '0')}-${lastConvoDate.getDate().toString().padStart(2, '0')} ${lastConvoDate.getHours().toString().padStart(2, '0')}:${lastConvoDate.getMinutes().toString().padStart(2, '0')}:${lastConvoDate.getSeconds().toString().padStart(2, '0')}`;
-            }
             return {
               device_id: device.id,
               model: device.board,
               firmwareVersion: device.appVersion,
               macAddress: device.macAddress,
-              bindTime: formattedBindTime,
-              lastConversation: formattedLastConversation,
+              bindTime: device.createDate,
+              lastConversation: device.lastConnectedAt,
               memSummary: device.memSummary,
               remark: device.alias,
               isEdit: false,
@@ -335,8 +340,8 @@ export default {
       return "";
     },
     getFirmwareTypeName(type) {
-      const firmwareType = FIRMWARE_TYPES.find(item => item.key === type);
-      return firmwareType ? firmwareType.name : type;
+      const firmwareType = this.firmwareTypes.find(item => item.key === type)
+      return firmwareType ? firmwareType.name : type
     },
     handleOtaSwitchChange(row) {
       Api.device.enableOtaUpgrade(row.device_id, row.otaSwitch ? 1 : 0, ({ data }) => {

@@ -35,6 +35,9 @@
       <div class="settings-btn" @click="handleDeviceManage">
         设备管理({{ device.deviceCount }})
       </div>
+      <div class="settings-btn" @click="handleChatHistory">
+        聊天记录
+      </div>
     </div>
   </div>
 </template>
@@ -49,6 +52,27 @@ export default {
   },
   data() {
     return { switchValue: false }
+  },
+  computed: {
+    formattedLastConnectedTime() {
+      if (!this.device.lastConnectedAt) return '暂未对话';
+
+      const lastTime = new Date(this.device.lastConnectedAt);
+      const now = new Date();
+      const diffMinutes = Math.floor((now - lastTime) / (1000 * 60));
+
+      if (diffMinutes <= 1) {
+        return '刚刚';
+      } else if (diffMinutes < 60) {
+        return `${diffMinutes}分钟前`;
+      } else if (diffMinutes < 24 * 60) {
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = diffMinutes % 60;
+        return `${hours}小时${minutes > 0 ? minutes + '分钟' : ''}前`;
+      } else {
+        return this.device.lastConnectedAt;
+      }
+    }
   },
   methods: {
     handleDelete() {

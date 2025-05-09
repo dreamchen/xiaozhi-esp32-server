@@ -106,8 +106,14 @@ const routes = [
       return import('../views/test.vue')
     },
   }
+  {
+    path: '/dict-management',
+    name: 'DictManagement',
+    component: function () {
+      return import('../views/DictManagement.vue')
+    }
+  }
 ]
-
 const router = new VueRouter({
   base: process.env.VUE_APP_PUBLIC_PATH || '/',
   routes

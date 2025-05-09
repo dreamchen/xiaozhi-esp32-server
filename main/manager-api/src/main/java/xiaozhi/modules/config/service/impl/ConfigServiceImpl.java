@@ -80,10 +80,10 @@ public class ConfigServiceImpl implements ConfigService {
                 null,
                 agent.getVadModelId(),
                 agent.getAsrModelId(),
-                agent.getLlmModelId(),
-                agent.getTtsModelId(),
-                agent.getMemModelId(),
-                agent.getIntentModelId(),
+                null,
+                null,
+                null,
+                null,
                 result,
                 isCache);
 
@@ -141,18 +141,6 @@ public class ConfigServiceImpl implements ConfigService {
         String alreadySelectedAsrModelId = (String) selectedModule.get("ASR");
         if (alreadySelectedAsrModelId != null && alreadySelectedAsrModelId.equals(agent.getAsrModelId())) {
             agent.setAsrModelId(null);
-        }
-        String alreadySelectedLlmModelId = (String) selectedModule.get("LLM");
-        if (alreadySelectedLlmModelId != null && alreadySelectedLlmModelId.equals(agent.getLlmModelId())) {
-            agent.setLlmModelId(null);
-        }
-        String alreadySelectedMemModelId = (String) selectedModule.get("Memory");
-        if (alreadySelectedMemModelId != null && alreadySelectedMemModelId.equals(agent.getMemModelId())) {
-            agent.setMemModelId(null);
-        }
-        String alreadySelectedIntentModelId = (String) selectedModule.get("Intent");
-        if (alreadySelectedIntentModelId != null && alreadySelectedIntentModelId.equals(agent.getIntentModelId())) {
-            agent.setIntentModelId(null);
         }
 
         // 构建模块配置
@@ -231,7 +219,6 @@ public class ConfigServiceImpl implements ConfigService {
      * @param config 系统参数列表
      * @return 配置信息
      */
-    @SuppressWarnings("unchecked")
     private Object buildConfig(Map<String, Object> config) {
 
         // 查询所有系统参数
@@ -350,7 +337,8 @@ public class ConfigServiceImpl implements ConfigService {
                         if (intentLLMModelId != null && intentLLMModelId.equals(llmModelId)) {
                             intentLLMModelId = null;
                         }
-                    } else if ("function_call".equals(map.get("type"))) {
+                    }
+                    if (map.get("functions") != null) {
                         String functionStr = (String) map.get("functions");
                         if (StringUtils.isNotBlank(functionStr)) {
                             String[] functions = functionStr.split("\\;");

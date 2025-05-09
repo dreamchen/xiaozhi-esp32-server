@@ -89,12 +89,12 @@ public interface DeviceService extends BaseService<DeviceEntity> {
      */
     String geCodeByDeviceId(String deviceId);
 
-
     /**
-     * 根据智能体ID获取设备最后连接时间
-     *
-     * @param agentId 智能体ID
-     * @return 最后连接时间
+     * 获取这个智能体设备理的最近的最后连接时间
+     * @param agentId 智能体id
+     * @return 返回设备最近的最后连接时间
      */
-    Date getLastConnectedAt(String agentId);
+    Date getLatestLastConnectionTime(String agentId);
+
+
 }

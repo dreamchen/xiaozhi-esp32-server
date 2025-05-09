@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-<a href="./README.md">English</a>
+<a href="./README_en.md">English</a>
 · <a href="./docs/FAQ.md">常见问题</a>
 · <a href="https://github.com/xinnan-tech/xiaozhi-esp32-server/issues">反馈问题</a>
 · <a href="./README.md#%E9%83%A8%E7%BD%B2%E6%96%87%E6%A1%A3">部署文档</a>
@@ -231,7 +231,7 @@ Websocket接口地址: wss://2662r3426b.vicp.fun/xiaozhi/v1/
 | 使用方式 | 支持平台 | 免费平台 |
 |:---:|:---:|:---:|
 | 本地使用 | FunASR、SherpaASR | FunASR、SherpaASR |
-| 接口调用 | DoubaoASR | - |
+| 接口调用 | DoubaoASR、FunASRServer、TencentASR、AliyunASR | FunASRServer |
 
 ---
 
