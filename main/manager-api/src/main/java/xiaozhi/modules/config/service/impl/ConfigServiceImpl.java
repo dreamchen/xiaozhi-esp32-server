@@ -286,7 +286,7 @@ public class ConfigServiceImpl implements ConfigService {
 
     /**
      * 构建模块配置
-     *
+     * @param assistantName 助手昵称
      * @param prompt        提示词
      * @param memSummary    记忆总结
      * @param voice         音色

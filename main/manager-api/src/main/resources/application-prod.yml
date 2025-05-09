@@ -13,7 +13,7 @@ spring:
       #MySQL
       driver-class-name: com.mysql.cj.jdbc.Driver
       url: jdbc:mysql://8.141.27.154:3306/xiaozhi?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
-      username: root
+      username: xiaoyou
       password: Youxlife0630
       initial-size: 10
       max-active: 100

@@ -4,7 +4,7 @@
       <!-- 左侧元素 -->
       <div class="header-left" @click="goHome">
         <img loading="lazy" alt="" src="@/assets/xiaozhi-logo.png" class="logo-img" />
-        <img loading="lazy" alt="" src="@/assets/xiaozhi-ai.png" class="brand-img" />
+        <img loading="lazy" alt="" src="@/assets/xiaoyou-ai.png" class="brand-img" />
       </div>
 
       <!-- 中间导航菜单 -->
@@ -24,7 +24,7 @@
         </div>
         <div class="equipment-management" :class="{ 'active-tab': $route.path === '/voiceClone-management' }"
           @click="goVoiceCloneManagement">
-          <img loading="lazy" alt="" src="@/assets/header/model_config.png"
+          <img loading="lazy" alt="" src="@/assets/header/voice_clone.png"
             :style="{ filter: $route.path === '/voiceClone-management' ? 'brightness(0) invert(1)' : 'None' }" />
           声音复刻
         </div>
@@ -279,7 +279,7 @@ export default {
 
 .equipment-management img {
   width: 15px;
-  height: 13px;
+  height: 15px;
 }
 
 .search-container {

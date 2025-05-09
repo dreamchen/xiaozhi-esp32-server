@@ -7,17 +7,15 @@ import time
 mem_summary_prompt = """
 # 智能对话总结机器人
 ## 核心能力
-1.通过对话历史、记忆等知识，总结user的重要信息
-2.要求含义明确、简短，每次对话后生成新的总结，相同内容以最新为准
-3.以user特征数据优先，配合收集assistant交互数据，不要单独总结assistant数据
-4.历史记录可适当进行覆盖，优先保证用户特征信息,最多不超过1000字
+1.User代表用户，通过对话历史、记忆等知识，总结用户的重要信息(如：姓名、年龄、兴趣)
+2.Assistant代表助手，以用户特征数据优先总结与助手的对话数据，不要单独对助手对话进行总结
+3.要求含义明确、简短，每次对话后生成新的总结，相同内容以最新为准
+4.用户重要信息始终保留，历史总结可基于关联性进行更新和补充，最多不超过1000字
 5.生成内容要尽可能的简单，且能表达出用户信息，以便在未来的对话中提供更个性化的服务
 
 ## 记忆结构
 输出格式为字符串，不需要解释、注释和说明，参考示例格式，如果会话中不包含不要出现示例内容，保存记忆时仅从对话提取信息，不要混入示例内容
-```
-用户说自己叫张三，今年36岁，喜欢画画。用户想去圆明园，询问圆明园历史，助手回复圆明园历史。
-```
+```用户说自己叫张三，今年36岁，喜欢画画。用户想去圆明园，询问圆明园历史，助手回复圆明园历史。```
 """
 
 def extract_data(_code):
@@ -35,7 +33,6 @@ logger = setup_logging()
 
 class MemoryProviderBase(ABC):
     def __init__(self, config, read_config_from_api):
-        logger.bind(tag=TAG).info(f"base memory __init__ config:{config}, read_config_from_api:{read_config_from_api}")
         self.config = config
         self.read_config_from_api = read_config_from_api
         self.role_id = None
@@ -48,22 +45,17 @@ class MemoryProviderBase(ABC):
         print("this is base func save_memory", msgs)
 
     async def query_memory(self, query: str) -> str:
-        logger.bind(tag=TAG).info(f"base query_memory mem_summary:{self.mem_summary}")
         return self.mem_summary
         
 
     def init_memory(self, role_id, llm):
-        logger.bind(tag=TAG).info(f"base init_memory role_id:{role_id}")
         self.role_id = role_id    
         self.llm = llm
 
     def load_mem_summary(self, mem_summary):
-        logger.bind(tag=TAG).info(f"base load_mem_summary mem_summary:{mem_summary}")
         self.mem_summary = mem_summary
 
     async def set_mem_summary(self, msgs):
-        logger.bind(tag=TAG).info(f"base mem_summary msgs:{msgs}")
-
         if self.llm is None:
             logger.bind(tag=TAG).error("LLM is not set for memory provider")
             return None
@@ -86,12 +78,11 @@ class MemoryProviderBase(ABC):
         time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         msgStr += f"当前时间：{time_str}"
 
-        logger.bind(tag=TAG).info(f"base save_mem_summary prompt:{mem_summary_prompt}, MSG:{msgStr}")
+        logger.bind(tag=TAG).debug(f"save_mem_summary prompt:{mem_summary_prompt}, MSG:{msgStr}")
         result = self.llm.response_no_stream(mem_summary_prompt, msgStr)
         self.mem_summary = extract_data(result)
-        logger.bind(tag=TAG).info(f"base save_mem_summary result:{result}, mem_summary:{self.mem_summary}")
+        logger.bind(tag=TAG).info(f"mem_summary:{self.mem_summary}")
 
-        print(f"base read_config_from_api: {self.read_config_from_api}")
         """如果是从配置文件获取，则进行二次实例化"""
         if not self.read_config_from_api:
             return
@@ -102,7 +93,7 @@ class MemoryProviderBase(ABC):
                 self.role_id,
                 self.role_id,
                 self.mem_summary)
-            logger.bind(tag=TAG).info(
+            logger.bind(tag=TAG).debug(
                 f"{time.time() - begin_time} 秒，服务端保存聊天总结成功: deviceId:{self.role_id}, clientId:{self.role_id}, mem_summary:{self.mem_summary}"
             )
         except DeviceNotFoundException as e:
@@ -112,5 +103,5 @@ class MemoryProviderBase(ABC):
         except Exception as e:
             logger.bind(tag=TAG).error(f"服务端保存聊天总结失败: {e}")
         
-        logger.bind(tag=TAG).info(f"base save memory summary successful - Role: {self.role_id}")
+        logger.bind(tag=TAG).info(f"Save memory_summary successful - Role: {self.role_id}")
         

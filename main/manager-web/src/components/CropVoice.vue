@@ -1,12 +1,18 @@
 <template>
     <div class="audio-editor">
-      <div class="controls">
-        <button v-if="!isRecording" @click="startRecording">开始录音</button>
-        <button v-if="isRecording" @click="stopRecording" style="background-color: red;">停止录音</button>
-        <label class="upload-btn">
-          上传音频
-          <input type="file" accept="audio/*" @change="handleFileUpload" />
-        </label>
+      <div style="display: flex; gap: 20px;">
+        <div class="controls" style="align-items: end; flex-shrink: 0;">
+          <button v-if="!isRecording" @click="startRecording">开始录音</button>
+          <button v-if="isRecording" @click="stopRecording" style="background-color: red;">停止录音</button>
+          <label :class="isRecording?'upload-btn disabled':'upload-btn'">
+            上传音频
+            <input type="file" :disabled="isRecording" accept="audio/*" @change="handleFileUpload" />
+          </label>
+        </div>
+        <div style="flex:1; display: flex; flex-direction: column; align-items: start; flex-wrap: wrap;">
+          <label style="font-weight: 500; padding: 5px 0;">录音时请朗读以下文本：</label>
+          <label style="text-align: left; color: red;">早上好！ 小优，今天天气怎么样？有点冷啊~空调调低两度。下午想听点音乐——播放周杰伦的《晴天》吧。对了晚上八点记得提醒我健身哦！</label>
+        </div>
       </div>
       
       <div ref="waveform" class="waveform-container"></div>
@@ -18,12 +24,12 @@
       <div class="row-wrapper">
       <div class="controls">
          <button @click="cropAudio" :disabled="!hasSelection">裁剪</button>
-        <button @click="resetSelection">重置</button>
+        <button @click="resetSelection" :disabled="!baseData || isRecording">重置</button>
     </div>
     <div class="controls">
-    <button @click="playAll">播放全部</button>
+    <button @click="playAll" :disabled="!baseData || isRecording">播放全部</button>
     <button @click="playSelection" :disabled="!hasSelection">播放选区</button>
-    <button @click="pause">暂停</button>
+    <button @click="pause" :disabled="!baseData || isRecording">暂停</button>
 </div>
       </div>
 
@@ -35,7 +41,7 @@
   </template>
   
   <script>
-  import WaveSurfer from 'wavesurfer.js';
+import WaveSurfer from 'wavesurfer.js';
   import RecordPlugin from 'wavesurfer.js/dist/plugins/record.js';
   import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.js';
   
@@ -80,10 +86,22 @@
     },
     methods: {
 
-        reset(){
-        this.wavesurfer.empty();
-        // this.clearSelection();
-        },
+      reset(){
+        if(this.isRecording){
+          this.stopRecording(); 
+          setTimeout(() => {
+            this.clearSelection();
+            // this.wavesurfer.empty();
+            this.wavesurfer.destroy();
+            this.initWaveSurfer();
+          }, 500);
+        }else{
+          this.clearSelection();
+          // this.wavesurfer.empty();
+          this.wavesurfer.destroy();
+          this.initWaveSurfer();
+        }
+      },
       initWaveSurfer() {
         this.wavesurfer = WaveSurfer.create({
           container: this.$refs.waveform,
@@ -312,7 +330,7 @@
   .audio-editor {
     max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
+    /* padding: 20px; */
     font-family: Arial, sans-serif;
   }
   
@@ -323,7 +341,7 @@
   }
 
   .controls {
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -340,6 +358,11 @@
     text-align: center;
   }
   
+  .controls .upload-btn.disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+
   .controls button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
@@ -368,11 +391,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-  /* margin-top: 20px;
-  padding: 15px; */
-  background-color: #f5f5f5;
-  border-radius: 4px;
-}
+    margin-top: 20px;
+    /* padding: 15px; */
+    background-color: #f5f5f5;
+    border-radius: 4px;
+  }
 
 .cropped-audio a {
   display: inline-block;

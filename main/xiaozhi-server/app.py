@@ -52,7 +52,7 @@ async def main():
         ota_task = asyncio.create_task(ota_server.start())
 
         logger.bind(tag=TAG).info(
-            "OTA接口是\t\thttp://{}:{}/xiaozhi/ota/",
+            "OTA接口是\t\thttp://{}:{}/xiaoyou/ota/",
             get_local_ip(),
             config["server"]["ota_port"],
         )
@@ -64,7 +64,7 @@ async def main():
         websocket_port = int(server_config.get("port", 8000))
 
     logger.bind(tag=TAG).info(
-        "Websocket地址是\tws://{}:{}/xiaozhi/v1/",
+        "Websocket地址是\tws://{}:{}/xiaoyou/v1/",
         get_local_ip(),
         websocket_port,
     )

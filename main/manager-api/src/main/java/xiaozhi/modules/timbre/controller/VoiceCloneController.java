@@ -1,6 +1,5 @@
 package xiaozhi.modules.timbre.controller;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -39,7 +38,7 @@ public class VoiceCloneController {
 
     @GetMapping
     @Operation(summary = "分页查找")
-    @RequiresPermissions("sys:role:superAdmin")
+    @RequiresPermissions("sys:role:normal")
     @Parameters({
             @Parameter(name = "ttsModelId", description = "对应 TTS 模型主键", required = false),
             @Parameter(name = "name", description = "音色名称"),
@@ -62,7 +61,7 @@ public class VoiceCloneController {
 
     @PostMapping("/update")
     @Operation(summary = "音色修改")
-    @RequiresPermissions("sys:role:superAdmin")
+    @RequiresPermissions("sys:role:normal")
     public Result<Void> update(@RequestBody VoiceCloneEntity dto) {
         if (StringUtils.isBlank(dto.getId()) || StringUtils.isBlank(dto.getName())) {
             return new Result<Void>().error("参数不能为空");
@@ -76,7 +75,7 @@ public class VoiceCloneController {
 
     @PostMapping("/delete")
     @Operation(summary = "音色删除")
-    @RequiresPermissions("sys:role:superAdmin")
+    @RequiresPermissions("sys:role:normal")
     public Result<Void> delete(@RequestBody String[] ids) {
         if (ObjectUtils.isEmpty(ids)) {
             return new Result<Void>().error("参数不能为空");
@@ -99,7 +98,7 @@ public class VoiceCloneController {
 
     @PostMapping("/clone")
     @Operation(summary = "声音复刻")
-    @RequiresPermissions("sys:role:superAdmin")
+    @RequiresPermissions("sys:role:normal")
     public Result<Void> clone(@RequestParam("file") MultipartFile file, @RequestParam("name") String name) {
         if (ObjectUtils.isEmpty(file)) {
             return new Result<Void>().error("文件不能为空");

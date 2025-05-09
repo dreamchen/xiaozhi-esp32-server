@@ -22,7 +22,7 @@ public class SaveMemSummaryDTO {
     @Schema(description = "客户端ID")
     private String clientId;
 
-    @NotNull(message = "记忆总结内容不能为空")
+    @NotBlank(message = "记忆总结内容不能为空")
     @Schema(description = "记忆总结内容")
     private String memSummary;
 }

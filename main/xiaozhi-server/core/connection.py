@@ -262,6 +262,9 @@ class ConnectionHandler:
             self.vad = self._vad
         if self.asr is None:
             self.asr = self._asr
+
+        """加载位置信息"""
+        self._initialize_location()
         """加载记忆"""
         self._initialize_memory()
         """加载意图识别"""
@@ -293,7 +296,7 @@ class ConnectionHandler:
                 self.headers.get("client-id", self.headers.get("device-id")),
             )
             private_config["delete_audio"] = bool(self.config.get("delete_audio", True))
-            self.logger.bind(tag=TAG).info(
+            self.logger.bind(tag=TAG).debug(
                 f"{time.time() - begin_time} 秒，获取差异化配置成功: {json.dumps(filter_sensitive_info(private_config), ensure_ascii=False)}"
             )
         except DeviceNotFoundException as e:
@@ -369,13 +372,21 @@ class ConnectionHandler:
             self.asr = modules["asr"]
         if modules.get("llm", None) is not None:
             self.llm = modules["llm"]
-        if modules.get("intent", None) is not None:
-            self.intent = modules["intent"]
+        if modules.get("tts", None) is not None:
+            self.tts = modules["tts"]
         if modules.get("memory", None) is not None:
             self.memory = modules["memory"]
-        if modules.get("mem_summary", None) is not None:
-            self.mem_summary = modules["mem_summary"]
+        if modules.get("intent", None) is not None:
+            self.intent = modules["intent"]
 
+
+    def _initialize_location(self):
+        """初始化位置模块"""
+        self.client_ip_info = get_ip_info(self.client_ip, self.logger)
+        self.logger.bind(tag=TAG).info(f"Client ip info: {self.client_ip_info}")
+        if self.client_ip_info is not None and "city" in self.client_ip_info:
+            self.prompt = self.prompt + f"\n[用户位置]\n{self.client_ip_info}"
+            self.change_system_prompt(self.prompt)
 
     def _initialize_memory(self):
         """初始化记忆模块"""
@@ -433,6 +444,7 @@ class ConnectionHandler:
 
     def change_system_prompt(self, prompt):
         self.prompt = prompt
+        self.logger.bind(tag=TAG).debug(f"change_system_prompt:{prompt}")
         # 更新系统prompt至上下文
         self.dialogue.update_system_message(self.prompt)
 
@@ -451,7 +463,8 @@ class ConnectionHandler:
                 )
                 memory_str = future.result()
 
-            self.logger.bind(tag=TAG).debug(f"记忆内容: {memory_str}")
+            self.logger.bind(tag=TAG).debug(f"记忆内容:{memory_str}, get_llm_dialogue_with_memory: {self.dialogue.get_llm_dialogue_with_memory(memory_str)}")
+
             llm_responses = self.llm.response(
                 self.session_id, self.dialogue.get_llm_dialogue_with_memory(memory_str)
             )
@@ -514,9 +527,7 @@ class ConnectionHandler:
 
         self.llm_finish_task = True
         self.dialogue.put(Message(role="assistant", content="".join(response_message)))
-        self.logger.bind(tag=TAG).debug(
-            json.dumps(self.dialogue.get_llm_dialogue(), indent=4, ensure_ascii=False)
-        )
+        self.logger.bind(tag=TAG).debug(f"chat dialogue:{json.dumps(self.dialogue.get_llm_dialogue(), indent=4, ensure_ascii=False)}")
         return True
 
     def chat_with_function_calling(self, query, tool_call=False):
@@ -544,7 +555,7 @@ class ConnectionHandler:
                 )
                 memory_str = future.result()
 
-            # self.logger.bind(tag=TAG).info(f"对话记录: {self.dialogue.get_llm_dialogue_with_memory(memory_str)}")
+            self.logger.bind(tag=TAG).debug(f"记忆内容:{memory_str}, get_llm_dialogue_with_memory: {self.dialogue.get_llm_dialogue_with_memory(memory_str)}")
 
             # 使用支持functions的streaming接口
             llm_responses = self.llm.response_with_functions(
@@ -576,7 +587,6 @@ class ConnectionHandler:
                 content_arguments += content
 
             if not tool_call_flag and content_arguments.startswith("<tool_call>"):
-                # print("content_arguments", content_arguments)
                 tool_call_flag = True
 
             if tools_call is not None:
@@ -596,7 +606,7 @@ class ConnectionHandler:
                         break
 
                     end_time = time.time()
-                    # self.logger.bind(tag=TAG).debug(f"大模型返回时间: {end_time - start_time} 秒, 生成token={content}")
+                    self.logger.bind(tag=TAG).debug(f"大模型返回时间: {end_time - start_time} 秒, 生成token={content}")
 
                     # 处理文本分段和TTS逻辑
                     # 合并当前全部文本并处理未分割部分
@@ -696,9 +706,7 @@ class ConnectionHandler:
             )
 
         self.llm_finish_task = True
-        self.logger.bind(tag=TAG).debug(
-            json.dumps(self.dialogue.get_llm_dialogue(), indent=4, ensure_ascii=False)
-        )
+        self.logger.bind(tag=TAG).debug(f"chat_with_function_calling dialogue:  {json.dumps(self.dialogue.get_llm_dialogue(), indent=4, ensure_ascii=False)}")
 
         return True
 

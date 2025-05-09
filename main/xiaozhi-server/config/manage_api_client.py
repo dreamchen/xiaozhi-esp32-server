@@ -157,7 +157,6 @@ def save_mem_summary(mac_address, client_id, mem_summary):
     )
 
 def save_memory_to_server(mac_address, client_id, memory_data):
-    print("save_memory_to_server")
     return ManageApiClient._instance._execute_request(
         "POST",
         "/config/save-memory-data",

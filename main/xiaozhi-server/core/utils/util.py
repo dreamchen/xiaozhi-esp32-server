@@ -265,64 +265,6 @@ def initialize_modules(
     """
     modules = {}
 
-    # 初始化TTS模块
-    if init_tts:
-        select_tts_module = config["selected_module"]["TTS"]
-        tts_type = (
-            select_tts_module
-            if "type" not in config["TTS"][select_tts_module]
-            else config["TTS"][select_tts_module]["type"]
-        )
-        modules["tts"] = tts.create_instance(
-            tts_type,
-            config["TTS"][select_tts_module],
-            str(config.get("delete_audio", True)).lower() in ("true", "1", "yes"),
-        )
-        logger.bind(tag=TAG).info(f"初始化组件: tts成功 {select_tts_module}")
-
-    # 初始化LLM模块
-    if init_llm:
-        select_llm_module = config["selected_module"]["LLM"]
-        llm_type = (
-            select_llm_module
-            if "type" not in config["LLM"][select_llm_module]
-            else config["LLM"][select_llm_module]["type"]
-        )
-        modules["llm"] = llm.create_instance(
-            llm_type,
-            config["LLM"][select_llm_module],
-        )
-        logger.bind(tag=TAG).info(f"初始化组件: llm成功 {select_llm_module}")
-
-    # 初始化Intent模块
-    if init_intent:
-        select_intent_module = config["selected_module"]["Intent"]
-        intent_type = (
-            select_intent_module
-            if "type" not in config["Intent"][select_intent_module]
-            else config["Intent"][select_intent_module]["type"]
-        )
-        modules["intent"] = intent.create_instance(
-            intent_type,
-            config["Intent"][select_intent_module],
-        )
-        logger.bind(tag=TAG).info(f"初始化组件: intent成功 {select_intent_module}")
-
-    # 初始化Memory模块
-    if init_memory:
-        select_memory_module = config["selected_module"]["Memory"]
-        memory_type = (
-            select_memory_module
-            if "type" not in config["Memory"][select_memory_module]
-            else config["Memory"][select_memory_module]["type"]
-        )
-        modules["memory"] = memory.create_instance(
-            memory_type,
-            config["Memory"][select_memory_module],
-            config.get("read_config_from_api", False)
-        )
-        logger.bind(tag=TAG).info(f"初始化组件: memory成功 {select_memory_module}")
-
     # 初始化VAD模块
     if init_vad:
         select_vad_module = config["selected_module"]["VAD"]

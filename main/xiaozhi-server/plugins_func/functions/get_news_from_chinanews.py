@@ -13,7 +13,7 @@ GET_NEWS_FROM_CHINANEWS_FUNCTION_DESC = {
     "function": {
         "name": "get_news_from_chinanews",
         "description": (
-            "用户有明确意图新闻查询，获取最新新闻，随机选择一条新闻进行播报。"
+            "当用户明确要求『搜索新闻』时触发。"
             "用户可以指定新闻类型，如社会新闻、科技新闻、国际新闻等。"
             "如果没有指定，默认播报社会新闻。"
             "用户可以要求获取详细内容，此时会获取新闻的详细内容。"
@@ -23,7 +23,7 @@ GET_NEWS_FROM_CHINANEWS_FUNCTION_DESC = {
             "properties": {
                 "category": {
                     "type": "string",
-                    "description": "新闻类别，例如社会、科技、国际。可选参数，如果不提供则使用默认类别",
+                    "description": "新闻类别，例如社会、科技、国际。可选参数，如果不提供则使用默认类别。禁止用于非新闻类内容（如电影、音乐、诗歌）。"
                 },
                 "detail": {
                     "type": "boolean",

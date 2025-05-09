@@ -1,7 +1,9 @@
 <template>
   <el-dialog class="voice-clone-dialog" :title="title" :visible.sync="visible" width="800px" @close="handleClose" @open="handleOpen" :close-on-click-modal="false">
-    <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-      <el-form-item label="声音名称" prop="name">
+    <el-form ref="form" :model="form" label-width="100px" @submit.native.prevent>
+      <el-form-item label="声音名称" :rules="[
+          { required: true, message: '请输入声音名称', trigger: 'blur' }
+        ]">
         <el-input v-model="form.name" placeholder="请输入声音名称"></el-input>
       </el-form-item>
         <crop-voice ref="cropVoice" />
@@ -36,11 +38,6 @@ export default {
   },
   data() {
     return {
-      rules: {
-        name: [
-          { required: true, message: '请输入声音名称', trigger: 'blur' }
-        ],
-      }
     }
   },
   computed: {

@@ -26,8 +26,8 @@ public class SaveMemoryDTO {
     @Schema(description = "客户端ID")
     private String clientId;
 
-    @NotNull(message = "客户端已实例化的聊天不能为空")
-    @Schema(description = "客户端已实例化的聊天")
+    @NotNull(message = "聊天记录不能为空")
+    @Schema(description = "聊天记录")
     private List<MemoryDTO> memoryData;
 
     @Data

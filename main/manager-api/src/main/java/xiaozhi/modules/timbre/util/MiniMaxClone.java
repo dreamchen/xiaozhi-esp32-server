@@ -49,7 +49,7 @@ public class MiniMaxClone extends BaseVoiceClone {
         int num = 0;
         VoiceCloneEntity entity = voiceCloneDao.selectOne(new QueryWrapper<VoiceCloneEntity>().eq("creator", user.getId()).eq("tts_model_id", ttsModelId).orderByDesc("create_date").last("LIMIT 1"));
         if (ObjectUtils.isNotEmpty(entity)) {
-            num = Integer.parseInt(entity.getTtsVoice().split("_")[2]);
+            num = Integer.parseInt(entity.getTtsVoice().split("_")[3]);
         }
         String voiceId = ttsModelId + "_" + user.getUsername() + "_" + getVoiceIdNum(num + 1, 4);
         map = voice_clone(map.get("fileId"), voiceId);
@@ -281,6 +281,7 @@ public class MiniMaxClone extends BaseVoiceClone {
                     "                \"voice_id\": \"" + voiceId + "\",\n" +
                     "                \"model\": \"speech-02-turbo\",\n" +
                     "                \"accuracy\": 0.8,\n" +
+                    "                \"need_noise_reduction\": true,\n" +
                     "                \"text\": \"" + demoText + "\"\n" +
                     "            }";
             OkHttpClient client = new OkHttpClient().newBuilder()
