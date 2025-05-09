@@ -105,7 +105,7 @@ const routes = [
     component: function () {
       return import('../views/test.vue')
     },
-  }
+  },
   {
     path: '/dict-management',
     name: 'DictManagement',
