@@ -1,0 +1,80 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "优享.Ai"
+			}
+		},
+		{
+			"path" : "pages/me/me",
+			"style" : 
+			{
+				"navigationBarTitleText" : "我的"
+			}
+		},
+		{
+            "path": "pages/login/login",
+            "style": {
+				"navigationBarTitleText" : "登录"
+			}
+        }, {
+            "path": "pages/login/forget",
+            "style": {
+				"navigationBarTitleText" : "忘记密码"
+			}
+        }, {
+            "path": "pages/login/register",
+            "style": {
+				"navigationBarTitleText" : "注册"
+			}
+        },
+        {
+        	"path" : "pages/chat/list",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "对话列表"
+        	}
+        },
+        {
+        	"path" : "pages/chat/chat",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "对话记录"
+        	}
+        },
+        {
+        	"path" : "pages/device/device",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "配置角色"
+        	}
+        } 
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"uniIdRouter": {},
+	"tabBar": {
+		"color": "#7A7E83",
+		"selectedColor": "#007AFF",
+		"borderStyle": "black",
+		"backgroundColor": "#F8F8F8",
+		"list": [{
+				"pagePath": "pages/index/index",
+				"iconPath": "static/tabar_robot.png",
+				"selectedIconPath": "static/tabar_robot.png",
+				"text": "设备"
+			},
+			{
+				"pagePath": "pages/me/me",
+				"iconPath": "/static/tabar_user.png",
+				"selectedIconPath": "static/tabar_user.png",
+				"text": "我的"
+			}
+		]
+	}
+}
