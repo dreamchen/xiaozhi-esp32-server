@@ -41,7 +41,7 @@ COPY --from=web-builder /app/web/dist /usr/share/nginx/html/web
 COPY --from=web-builder /app/h5/dist/build/h5 /usr/share/nginx/html/h5
 
 # 复制Java后端JAR包
-COPY --from=api-builder /app/target/xiaozhi-esp32-api.jar /app/xiaozhi-esp32-api.jar
+COPY --from=api-builder /app/target/xiaoyou-esp32-api.jar /app/xiaoyou-esp32-api.jar
 
 # 暴露端口
 EXPOSE 8002

@@ -76,6 +76,11 @@ import * as API from '@/utils/api'
 							ttsVoiceType: _agent.ttsVoiceType,
 							ttsVoiceId: _agent.ttsVoiceId,
 						});
+						Object.assign(this.device, {
+							ttsModelId: _agent.ttsModelId,
+							ttsVoiceType: _agent.ttsVoiceType,
+							ttsVoiceId: _agent.ttsVoiceId,
+						})
 						this.fetchVoiceOptions(_agent.ttsModelId);
 					}
 				},
@@ -96,6 +101,7 @@ import * as API from '@/utils/api'
 			voiceList: {
 				handler() {
 					this.voiceIndex = this.voiceList.findIndex(item => item.value === this.device.ttsVoiceId && item.type === this.device.ttsVoiceType);
+					console.info('voiceIndex', this.voiceIndex)
 				},
 				immediate: true
 			}
@@ -150,6 +156,7 @@ import * as API from '@/utils/api'
 							type: 0,
 							label: voice.name + ' - 官方'
 						}));
+						console.info('voiceList', this.voiceList)
 					} else {
 						this.voiceList = [];
 					}
@@ -162,9 +169,8 @@ import * as API from '@/utils/api'
 							type: 1,
 							label: voice.name + ' - 复刻'
 						}));
-						if(_voiceList){
-							this.voiceList = _voiceList.concat(this.voiceList);
-						}
+						this.voiceList = this.voiceList.concat(_voiceList);
+						console.info(this.voiceList)
 					}
 				});
 			},
@@ -225,6 +231,9 @@ import * as API from '@/utils/api'
 		flex-direction: column;
 		text-align: right;
 		align-items: flex-end;
+	}
+	.content-item uni-picker{
+		width: 100%;
 	}
 	.content-item-tips{
 		font-size: 28rpx;

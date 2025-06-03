@@ -52,11 +52,6 @@
 				</view>
 			</view>
 			<view class="fixed-btn" @click="showBindDevice('success')"><i class="fas fa-plus"></i></view>
-			<!-- 普通弹窗 -->
-			<uni-popup ref="popup" background-color="#fff">
-				<view class="popup-content" :class="{ 'popup-height': type === 'left' || type === 'right' }"><text
-						class="text">popup 内容</text></view>
-			</uni-popup>
 			<!-- 提示信息弹窗 -->
 			<uni-popup ref="message" type="message">
 				<uni-popup-message :type="msgType" :message="messageText" :duration="3000"></uni-popup-message>

@@ -3,12 +3,14 @@ package xiaozhi.modules.timbre.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import xiaozhi.modules.timbre.entity.VoiceCloneEntity;
 
 /**
  * 查询声音复刻的DTO
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Schema(description = "查询声音复刻的DTO")
 public class VoiceClonePageDTO extends VoiceCloneEntity {
 

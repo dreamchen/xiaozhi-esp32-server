@@ -8,7 +8,7 @@
 xiaozhi-esp32-server
   ├─ xiaozhi-server 8000 端口 Python语言开发 负责与esp32通信
   ├─ manager-web 8001 端口 Node.js+Vue开发 负责提供控制台的web界面
-  ├─ manager-mobile 8001 端口 uniapp开发 负责提供控制台的移动端界面（h5/小程序/app）
+  ├─ manager-mobile 5173 端口 uniapp开发 负责提供控制台的移动端界面（h5/小程序/app）
   ├─ manager-api 8002 端口 Java语言开发 负责提供控制台的api
 ```
 

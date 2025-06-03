@@ -1,11 +1,19 @@
 <template>
 	<z-paging class="page" ref="paging" v-model="dataList" @query="queryList">
 		<view class="wrapper">
-			<view class="item" v-for="(item,index) in dataList" :key="index" @click="gotoChat(item)">
-				<view class="item-time">{{formatTime(item.createdAt)}}<view class="item-num">{{item.chatCount>99?'99+':item.chatCount}}</view></view>
-				<i class="far fa-trash-alt"></i>
+			<view class="item" v-for="(item,index) in dataList" :key="index">
+				<view class="item-time" @click="gotoChat(item)">{{formatTime(item.createdAt)}}<view class="item-num">{{item.chatCount>99?'99+':item.chatCount}}</view></view>
+				<i class="far fa-trash-alt" @click="showDelSession(item.sessionId)"></i>
 			</view>
 		</view>
+		<!-- 提示信息弹窗 -->
+		<uni-popup ref="message" type="message">
+			<uni-popup-message :type="msgType" :message="messageText" :duration="3000"></uni-popup-message>
+		</uni-popup>
+		<!-- 提示窗示例 -->
+		<uni-popup ref="alertDialog" type="dialog">
+			<uni-popup-dialog :type="msgType" cancelText="取消" confirmText="确定" title="确定要删除吗？" content="该操作将删除聊天记录，是否确定！" @confirm="delSession"></uni-popup-dialog>
+		</uni-popup>
 	</z-paging>
 </template>
 
@@ -30,6 +38,15 @@ import { formatTime } from '@/utils/index'
 			this.alias = option && option.alias || '';
 		},
 		methods: {
+			dialogToggle(type) {
+				this.msgType = type
+				this.$refs.alertDialog.open()
+			},
+			messageToggle(type, text) {
+				this.msgType = type?type:"success"
+				this.messageText = text?text:"移动端功能开发中，敬请期待…"
+				this.$refs.message.open()
+			},
 			// @query所绑定的方法不要自己调用！！需要刷新列表数据时，只需要调用this.$refs.paging.reload()即可
             queryList(pageNo, pageSize) {
 				if(pageNo>1){
@@ -49,6 +66,13 @@ import { formatTime } from '@/utils/index'
 					url: '/pages/chat/chat?sessionId='+item.sessionId+'&mac='+this.mac+'&alias='+this.alias
 				});
 			},
+			showDelSession(id) {
+				this.sessionId = id;
+				this.messageToggle('warn','初期阶段暂不开放')
+			},
+			delSession() {
+				this.messageToggle('warn','初期阶段暂不开放')
+			}
 		}
 	}
 </script>

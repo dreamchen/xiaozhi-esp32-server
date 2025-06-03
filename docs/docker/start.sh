@@ -1,6 +1,6 @@
 #!/bin/bash
 # 启动Java后端（docker内监听8003端口）
-java -jar /app/xiaozhi-esp32-api.jar \
+java -jar /app/xiaoyou-esp32-api.jar \
   --server.port=${SERVER_PORT} \
   --spring.profiles.active=${SPRING_PROFILES_ACTIVE} \
   --server.servlet.context-path=${SERVER_SERVLET_CONTEXT_PATH} \

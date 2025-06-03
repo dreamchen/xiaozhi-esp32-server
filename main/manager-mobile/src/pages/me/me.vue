@@ -76,7 +76,7 @@
 				API.getUserInfo(({data})=>{
 					if(data.code===0){
 						let _userInfo = getApp().globalData.userInfo;
-						Object.assign(_userInfo, res.data.data)
+						Object.assign(_userInfo, data.data)
 						this.userInfo = _userInfo
 						getApp().globalData.userInfo = this.userInfo
 						try {
