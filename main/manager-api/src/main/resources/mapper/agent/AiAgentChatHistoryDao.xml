@@ -27,18 +27,45 @@
     WHERE id IN (
       SELECT audio_id 
       FROM ai_agent_chat_history 
-      WHERE agent_id = #{agentId}
+      WHERE 1=1
+      <if test="agentId != null">
+        AND agent_id = #{agentId}
+      </if>
+      <if test="macAddress != null">
+        AND mac_address = #{macAddress}
+      </if>
+      <if test="agentId == null and macAddress == null">
+        AND 1=2
+      </if>
     )
   </delete>
   
   <update id="deleteAudioIdByAgentId">
     UPDATE ai_agent_chat_history
     SET audio_id = NULL
-    WHERE agent_id = #{agentId}
+    WHERE 1=1
+    <if test="agentId != null">
+      AND agent_id = #{agentId}
+    </if>
+    <if test="macAddress != null">
+      AND mac_address = #{macAddress}
+    </if>
+    <if test="agentId == null and macAddress == null">
+      AND 1=2
+    </if>
   </update>
 
   <delete id="deleteHistoryByAgentId">
     DELETE FROM ai_agent_chat_history 
-    WHERE agent_id = #{agentId}
+    WHERE  1=1
+    <if test="agentId != null">
+      AND agent_id = #{agentId}
+    </if>
+    <if test="macAddress != null">
+      AND mac_address = #{macAddress}
+    </if>
+    <if test="agentId == null and macAddress == null">
+      AND 1=2
+    </if>
   </delete>
 </mapper>

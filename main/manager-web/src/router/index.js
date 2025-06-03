@@ -70,6 +70,13 @@ const routes = [
     }
   },
   {
+    path: '/voiceClone-management',
+    name: 'VoiceCloneManagement',
+    component: function () {
+      return import('../views/voiceCloneManagement.vue')
+    }
+  },
+  {
     path: '/params-management',
     name: 'ParamsManagement',
     component: function () {

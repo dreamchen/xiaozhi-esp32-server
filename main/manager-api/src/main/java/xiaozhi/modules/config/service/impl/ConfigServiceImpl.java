@@ -26,7 +26,9 @@ import xiaozhi.modules.model.entity.ModelConfigEntity;
 import xiaozhi.modules.model.service.ModelConfigService;
 import xiaozhi.modules.sys.dto.SysParamsDTO;
 import xiaozhi.modules.sys.service.SysParamsService;
+import xiaozhi.modules.timbre.entity.VoiceCloneEntity;
 import xiaozhi.modules.timbre.service.TimbreService;
+import xiaozhi.modules.timbre.service.VoiceCloneService;
 import xiaozhi.modules.timbre.vo.TimbreDetailsVO;
 
 @Service
@@ -39,6 +41,7 @@ public class ConfigServiceImpl implements ConfigService {
     private final AgentTemplateService agentTemplateService;
     private final RedisUtils redisUtils;
     private final TimbreService timbreService;
+    private final VoiceCloneService voiceCloneService;
 
     @Override
     public Object getConfig(Boolean isCache) {
@@ -62,7 +65,7 @@ public class ConfigServiceImpl implements ConfigService {
 
         // 构建模块配置
         buildModuleConfig(
-                null,
+                agent.getAssistantName(),
                 null,
                 null,
                 null,
@@ -102,9 +105,20 @@ public class ConfigServiceImpl implements ConfigService {
         }
         // 获取音色信息
         String voice = null;
-        TimbreDetailsVO timbre = timbreService.get(agent.getTtsVoiceId());
-        if (timbre != null) {
-            voice = timbre.getTtsVoice();
+
+        //判断音色类型，复刻还是官方
+        if (device.getTtsVoiceType() == 1) {
+            //复刻音色
+            VoiceCloneEntity voiceClone = voiceCloneService.selectById(device.getTtsVoiceId());
+            if (voiceClone != null) {
+                voice = voiceClone.getTtsVoice();
+            }
+        } else {
+            //官方音色
+            TimbreDetailsVO timbre = timbreService.get(device.getTtsVoiceId());
+            if (timbre != null) {
+                voice = timbre.getTtsVoice();
+            }
         }
         // 构建返回数据
         Map<String, Object> result = new HashMap<>();
@@ -134,15 +148,15 @@ public class ConfigServiceImpl implements ConfigService {
 
         // 构建模块配置
         buildModuleConfig(
-                agent.getAgentName(),
+                device.getAssistantName(),
                 agent.getSystemPrompt(),
-                agent.getSummaryMemory(),
+                device.getSummaryMemory(),
                 voice,
                 agent.getVadModelId(),
                 agent.getAsrModelId(),
                 agent.getLlmModelId(),
                 agent.getVllmModelId(),
-                agent.getTtsModelId(),
+                device.getTtsModelId(),
                 agent.getMemModelId(),
                 agent.getIntentModelId(),
                 result,
@@ -154,7 +168,7 @@ public class ConfigServiceImpl implements ConfigService {
     /**
      * 构建配置信息
      * 
-     * @param paramsList 系统参数列表
+     * @param config 系统参数
      * @return 配置信息
      */
     private Object buildConfig(Map<String, Object> config) {

@@ -32,16 +32,18 @@ public interface AgentChatHistoryService extends IService<AgentChatHistoryEntity
      *
      * @param agentId   智能体ID
      * @param sessionId 会话ID
+     * @param macAddress 设备MAC地址
      * @return 聊天记录列表
      */
-    List<AgentChatHistoryDTO> getChatHistoryBySessionId(String agentId, String sessionId);
+    List<AgentChatHistoryDTO> getChatHistoryBySessionId(String agentId, String macAddress, String sessionId);
 
     /**
      * 根据智能体ID删除聊天记录
      *
      * @param agentId     智能体ID
+     * @param macAddress   设备MAC地址
      * @param deleteAudio 是否删除音频
      * @param deleteText  是否删除文本
      */
-    void deleteByAgentId(String agentId, Boolean deleteAudio, Boolean deleteText);
+    void deleteByAgentId(String agentId, String macAddress, Boolean deleteAudio, Boolean deleteText);
 }

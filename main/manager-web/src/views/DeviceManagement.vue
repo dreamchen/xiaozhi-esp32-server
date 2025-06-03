@@ -18,7 +18,7 @@
             <el-table ref="deviceTable" :data="paginatedDeviceList" class="transparent-table"
               :header-cell-class-name="headerCellClassName" v-loading="loading" element-loading-text="拼命加载中"
               element-loading-spinner="el-icon-loading" element-loading-background="rgba(255, 255, 255, 0.7)">
-              <el-table-column label="选择" align="center" width="120">
+              <el-table-column label="选择" align="center" width="60">
                 <template slot-scope="scope">
                   <el-checkbox v-model="scope.row.selected"></el-checkbox>
                 </template>
@@ -28,30 +28,43 @@
                   {{ getFirmwareTypeName(scope.row.model) }}
                 </template>
               </el-table-column>
-              <el-table-column label="固件版本" prop="firmwareVersion" align="center"></el-table-column>
-              <el-table-column label="Mac地址" prop="macAddress" align="center"></el-table-column>
-              <el-table-column label="绑定时间" prop="bindTime" align="center"></el-table-column>
-              <el-table-column label="最近对话" prop="lastConversation" align="center"></el-table-column>
-              <el-table-column label="备注" align="center">
+              <el-table-column label="固件版本" prop="firmwareVersion" align="center" width="80"></el-table-column>
+              <el-table-column label="Mac地址" prop="macAddress" align="center" width="140"></el-table-column>
+              <el-table-column label="绑定时间" prop="bindTime" align="center" width="160"></el-table-column>
+              <el-table-column label="最近对话" prop="lastConversation" align="center" width="160"></el-table-column>
+              <el-table-column label="记忆体" prop="summaryMemory" align="center">
                 <template slot-scope="scope">
-                  <el-input v-if="scope.row.isEdit" v-model="scope.row.remark" size="mini"
-                    @blur="stopEditRemark(scope.$index)"></el-input>
-                  <span v-else>
-                    <i v-if="!scope.row.remark" class="el-icon-edit"
-                      @click="startEditRemark(scope.$index, scope.row)"></i>
-                    <span v-else @click="startEditRemark(scope.$index, scope.row)">
-                      {{ scope.row.remark }}
-                    </span>
-                  </span>
+                  <div style="display: flex; justify-content: center; align-items: center; gap: 10px;">
+                  <el-tooltip popper-class="custom-tooltip" placement="top">
+                    <template #content>
+                      <div style="max-width: 400px; max-height: 150px; overflow: auto;">
+                        {{ scope.row.summaryMemory }}
+                      </div>
+                    </template>
+                    <span style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis;">{{ scope.row.summaryMemory }}</span>
+                  </el-tooltip>
+                  <el-popconfirm v-if="scope.row.summaryMemory" title="确定要删除记忆吗？" @confirm="handleDelMemSummary(scope.row)">
+                    <i slot="reference" class="el-icon-delete" style="cursor: pointer; color: red;"></i>
+                  </el-popconfirm>
+                </div>
                 </template>
               </el-table-column>
-              <el-table-column label="OTA升级" align="center">
+              <el-table-column label="备注" align="center">
+                 <template slot-scope="scope">
+                  <el-input :ref="'alias_input_'+scope.$index" v-if="scope.row.isEdit" v-model="scope.row.alias" size="small" class="input-pd4" @blur="stopEditRemark(scope.$index, scope.row)"></el-input>
+                  <span v-else>
+                    {{ scope.row.alias }}
+                  </span>
+                  <i  v-if="!scope.row.isEdit" class="el-icon-edit" @click="startEditRemark(scope.$index, scope.row)"></i>
+                </template>
+              </el-table-column>
+              <el-table-column label="OTA升级" align="center" width="80">
                 <template slot-scope="scope">
                   <el-switch v-model="scope.row.otaSwitch" size="mini" active-color="#13ce66" inactive-color="#ff4949"
                     @change="handleOtaSwitchChange(scope.row)"></el-switch>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" align="center">
+              <el-table-column label="操作" align="center" width="60">
                 <template slot-scope="scope">
                   <el-button size="mini" type="text" @click="handleUnbind(scope.row.device_id)">
                     解绑
@@ -97,6 +110,7 @@
 </template>
 
 <script>
+import {showDanger, showSuccess} from '@/utils'
 import Api from '@/apis/api';
 import AddDeviceDialog from "@/components/AddDeviceDialog.vue";
 import HeaderBar from "@/components/HeaderBar.vue";
@@ -118,6 +132,7 @@ export default {
       loading: false,
       userApi: null,
       firmwareTypes: [],
+      oldVal: '',
     };
   },
   computed: {
@@ -248,10 +263,30 @@ export default {
       this.addDeviceDialogVisible = true;
     },
     startEditRemark(index, row) {
+      this.oldVal = row.alias || '';
       this.deviceList[index].isEdit = true;
+      this.$nextTick(()=>{
+        this.$refs['alias_input_'+index].focus();
+      })
     },
-    stopEditRemark(index) {
-      this.deviceList[index].isEdit = false;
+    stopEditRemark(index, row) {
+      if(!row.alias || row.alias.trim() === ''){
+          this.$message.warn('备注不能为空')
+          return false;
+      }
+      if(this.oldVal === row.alias) {
+        this.deviceList[index].isEdit = false;
+        return false;
+      }
+      Api.device.setAlias(row.device_id, row.alias, ({ data }) => {
+        if (data.code === 0) {
+          this.deviceList[index].isEdit = false
+          showSuccess('设置成功')
+          this.fetchBindDevices(this.$route.query.agentId);
+        } else {
+          showDanger(data.msg)
+        }
+      })
     },
     handleUnbind(device_id) {
       this.$confirm('确认要解绑该设备吗？', '警告', {
@@ -301,7 +336,8 @@ export default {
               macAddress: device.macAddress,
               bindTime: device.createDate,
               lastConversation: device.lastConnectedAt,
-              remark: device.alias,
+              summaryMemory: device.summaryMemory,
+              alias: device.alias,
               isEdit: false,
               otaSwitch: device.autoUpdate === 1,
               rawBindTime: new Date(device.createDate).getTime()
@@ -331,6 +367,16 @@ export default {
           this.$message.success(row.otaSwitch ? '已设置成自动升级' : '已关闭自动升级')
         } else {
           row.otaSwitch = !row.otaSwitch
+          this.$message.error(data.msg || '操作失败')
+        }
+      })
+    },
+    handleDelMemSummary(row) {
+      Api.device.delMemSummary(row.device_id, ({ data }) => {
+        if (data.code === 0) {
+          this.$message.success('删除记忆体成功')
+          this.fetchBindDevices(this.$route.query.agentId)
+        } else {
           this.$message.error(data.msg || '操作失败')
         }
       })
@@ -639,6 +685,11 @@ export default {
 :deep(.el-icon-edit:hover) {
   color: #5a64b5;
 }
+
+.input-pd4 :deep .el-input__inner {
+  padding: 0 4px;
+}
+
 
 :deep(.custom-selection-header .el-checkbox) {
   display: none !important;

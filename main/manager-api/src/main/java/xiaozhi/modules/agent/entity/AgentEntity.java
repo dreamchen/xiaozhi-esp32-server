@@ -27,6 +27,9 @@ public class AgentEntity {
     @Schema(description = "智能体名称")
     private String agentName;
 
+    @Schema(description = "助手名称")
+    private String assistantName;
+
     @Schema(description = "语音识别模型标识")
     private String asrModelId;
 
@@ -45,6 +48,9 @@ public class AgentEntity {
     @Schema(description = "音色标识")
     private String ttsVoiceId;
 
+    @Schema(description = "音色标识类型：0：官方、1：复刻")
+    private Integer ttsVoiceType;
+
     @Schema(description = "记忆模型标识")
     private String memModelId;
 
@@ -56,10 +62,6 @@ public class AgentEntity {
 
     @Schema(description = "角色设定参数")
     private String systemPrompt;
-
-    @Schema(description = "总结记忆", example = "构建可生长的动态记忆网络，在有限空间内保留关键信息的同时，智能维护信息演变轨迹\n" +
-            "根据对话记录，总结user的重要信息，以便在未来的对话中提供更个性化的服务", required = false)
-    private String summaryMemory;
 
     @Schema(description = "语言编码")
     private String langCode;

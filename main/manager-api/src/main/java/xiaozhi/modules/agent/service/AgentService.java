@@ -7,6 +7,7 @@ import xiaozhi.common.page.PageData;
 import xiaozhi.common.service.BaseService;
 import xiaozhi.modules.agent.dto.AgentDTO;
 import xiaozhi.modules.agent.entity.AgentEntity;
+import xiaozhi.modules.device.entity.DeviceEntity;
 
 /**
  * 智能体表处理service
@@ -79,4 +80,18 @@ public interface AgentService extends BaseService<AgentEntity> {
      * @return 是否有权限
      */
     boolean checkAgentPermission(String agentId, Long userId);
+
+    /**
+     * 查询默认智能体信息
+     *
+     * @return 默认智能体信息，不存在时返回null
+     */
+    AgentEntity getDefaultAgent();
+
+    /**
+     * 获取用户智能体列表
+     *
+     * @return 智能体列表
+     */
+    List<AgentEntity> getAgentsTemplate();
 }

@@ -35,6 +35,11 @@ public class AgentTemplateEntity implements Serializable {
     private String agentName;
 
     /**
+     * 助手名称
+     */
+    private String assistantName;
+
+    /**
      * 语音识别模型标识
      */
     private String asrModelId;
@@ -65,6 +70,11 @@ public class AgentTemplateEntity implements Serializable {
     private String ttsVoiceId;
 
     /**
+     * 音色类型：0：官方、1：复刻
+     */
+    private Integer ttsVoiceType;
+
+    /**
      * 记忆模型标识
      */
     private String memModelId;
@@ -84,10 +94,6 @@ public class AgentTemplateEntity implements Serializable {
      */
     private String systemPrompt;
 
-    /**
-     * 总结记忆
-     */
-    private String summaryMemory;
     /**
      * 语言编码
      */

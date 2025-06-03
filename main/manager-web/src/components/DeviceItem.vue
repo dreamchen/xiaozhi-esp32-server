@@ -19,13 +19,16 @@
     <div class="device-name">
       音色模型：{{ device.ttsModelName }} ({{ device.ttsVoiceName }})
     </div>
-    <div style="display: flex;gap: 10px;align-items: center;">
+    <div class="version-info">
+      <div>最近对话：{{ formattedLastConnectedTime }}</div>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-top: 10px;">
       <div class="settings-btn" @click="handleConfigure">
         配置角色
       </div>
-      <div class="settings-btn" @click="handleDeviceManage">
-        设备管理({{ device.deviceCount }})
-      </div>
+      <!-- <div class="settings-btn" disabled>
+        声纹识别
+      </div> -->
       <div class="settings-btn" @click="handleChatHistory"
         :class="{ 'disabled-btn': device.memModelId === 'Memory_nomem' }">
         <el-tooltip v-if="device.memModelId === 'Memory_nomem'" content="请先在“配置角色”界面开启记忆" placement="top">
@@ -33,9 +36,9 @@
         </el-tooltip>
         <span v-else>聊天记录</span>
       </div>
-    </div>
-    <div class="version-info">
-      <div>最近对话：{{ formattedLastConnectedTime }}</div>
+      <div class="settings-btn" @click="handleDeviceManage">
+        设备管理({{ device.deviceCount }})
+      </div>
     </div>
   </div>
 </template>
@@ -120,12 +123,11 @@ export default {
 }
 
 .version-info {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
-  font-size: 12px;
-  color: #979db1;
+  margin: 7px 0 10px;
   font-weight: 400;
+  font-size: 11px;
+  color: #979db1;
+  text-align: left;
 }
 
 .disabled-btn {

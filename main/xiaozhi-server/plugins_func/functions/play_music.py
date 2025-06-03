@@ -21,13 +21,15 @@ play_music_function_desc = {
     "type": "function",
     "function": {
         "name": "play_music",
-        "description": "唱歌、听歌、播放音乐的方法。",
+        "description": (
+            "当用户明确要求『播放音乐』时触发，例如：播放歌曲、专辑或指定音乐类型。注意：不处理搜索音乐、推荐歌曲、古诗朗诵、诗歌相关请求。"
+            ),
         "parameters": {
             "type": "object",
             "properties": {
                 "song_name": {
                     "type": "string",
-                    "description": "歌曲名称，如果用户没有指定具体歌名则为'random', 明确指定的时返回音乐的名字 示例: ```用户:播放两只老虎\n参数：两只老虎``` ```用户:播放音乐 \n参数：random ```",
+                    "description": "歌曲名称，如果用户没有指定具体歌名则为'random', 明确指定的时返回音乐的名字 示例: ```用户:播放两只老虎\n参数：两只老虎``` ```用户:播放音乐 \n参数：random ```。禁止用于非歌曲类内容（如电影、诗歌、古诗、诗词）",
                 }
             },
             "required": ["song_name"],

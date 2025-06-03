@@ -1,28 +1,19 @@
 package xiaozhi.modules.device.service.impl;
 
-import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.UUID;
-
+import cn.hutool.core.util.RandomUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-
-import cn.hutool.core.util.RandomUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import xiaozhi.common.constant.Constant;
 import xiaozhi.common.exception.RenException;
 import xiaozhi.common.page.PageData;
@@ -32,7 +23,10 @@ import xiaozhi.common.service.impl.BaseServiceImpl;
 import xiaozhi.common.user.UserDetail;
 import xiaozhi.common.utils.ConvertUtils;
 import xiaozhi.common.utils.DateUtils;
+import xiaozhi.modules.agent.dao.AgentDao;
+import xiaozhi.modules.agent.entity.AgentEntity;
 import xiaozhi.modules.device.dao.DeviceDao;
+import xiaozhi.modules.device.dto.DeviceDTO;
 import xiaozhi.modules.device.dto.DevicePageUserDTO;
 import xiaozhi.modules.device.dto.DeviceReportReqDTO;
 import xiaozhi.modules.device.dto.DeviceReportRespDTO;
@@ -44,17 +38,26 @@ import xiaozhi.modules.device.vo.UserShowDeviceListVO;
 import xiaozhi.modules.security.user.SecurityUser;
 import xiaozhi.modules.sys.service.SysParamsService;
 import xiaozhi.modules.sys.service.SysUserUtilService;
+import xiaozhi.modules.timbre.service.TimbreService;
+import xiaozhi.modules.timbre.service.VoiceCloneService;
+
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> implements DeviceService {
 
+    private final TimbreService timbreService;
+    private final VoiceCloneService voiceCloneService;
     private final DeviceDao deviceDao;
     private final SysUserUtilService sysUserUtilService;
     private final SysParamsService sysParamsService;
     private final RedisUtils redisUtils;
     private final OtaService otaService;
+    private final AgentDao agentDao;
 
     @Async
     public void updateDeviceConnectionInfo(String agentId, String deviceId, String appVersion) {
@@ -108,11 +111,11 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
             throw new RenException("用户未登录");
         }
 
+
         Date currentTime = new Date();
         DeviceEntity deviceEntity = new DeviceEntity();
         deviceEntity.setId(deviceId);
         deviceEntity.setBoard(board);
-        deviceEntity.setAgentId(agentId);
         deviceEntity.setAppVersion(appVersion);
         deviceEntity.setMacAddress(macAddress);
         deviceEntity.setUserId(user.getId());
@@ -122,6 +125,30 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
         deviceEntity.setUpdater(user.getId());
         deviceEntity.setUpdateDate(currentTime);
         deviceEntity.setLastConnectedAt(currentTime);
+
+
+        if (StringUtils.isBlank(agentId)) {
+            AgentEntity agentEntity = agentDao.getDefaultAgent();
+            if (agentEntity == null) {
+                throw new RenException("设备绑定失败，获取默认创建智能体失败");
+            }
+            deviceEntity.setAgentId(agentEntity.getId());
+            deviceEntity.setAssistantName(agentEntity.getAssistantName());
+            deviceEntity.setTtsModelId(agentEntity.getTtsModelId());
+            deviceEntity.setTtsVoiceType(agentEntity.getTtsVoiceType());
+            deviceEntity.setTtsVoiceId(agentEntity.getTtsVoiceId());
+        } else {
+            AgentEntity agentEntity = agentDao.selectById(agentId);
+            if (agentEntity == null) {
+                throw new RenException("设备绑定失败，智能体不存在");
+            }
+            deviceEntity.setAgentId(agentId);
+            deviceEntity.setAssistantName(agentEntity.getAssistantName());
+            deviceEntity.setTtsModelId(agentEntity.getTtsModelId());
+            deviceEntity.setTtsVoiceType(agentEntity.getTtsVoiceType());
+            deviceEntity.setTtsVoiceId(agentEntity.getTtsVoiceId());
+        }
+
         deviceDao.insert(deviceEntity);
 
         // 清理redis缓存
@@ -132,7 +159,7 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
 
     @Override
     public DeviceReportRespDTO checkDeviceActive(String macAddress, String clientId,
-            DeviceReportReqDTO deviceReport) {
+                                                 DeviceReportReqDTO deviceReport) {
         DeviceReportRespDTO response = new DeviceReportRespDTO();
         response.setServer_time(buildServerTime());
 
@@ -192,11 +219,51 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
     }
 
     @Override
-    public List<DeviceEntity> getUserDevices(Long userId, String agentId) {
+    public List<DeviceDTO> getUserDevices(Long userId, String agentId) {
         QueryWrapper<DeviceEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("user_id", userId);
-        wrapper.eq("agent_id", agentId);
-        return baseDao.selectList(wrapper);
+        if (ObjectUtils.isNotEmpty(userId)) {
+            wrapper.eq("user_id", userId);
+        }
+        if (StringUtils.isNotBlank(agentId)) {
+            wrapper.eq("agent_id", agentId);
+        }
+        List<DeviceEntity> list = baseDao.selectList(wrapper);
+        return list.stream().map(deviceEntity -> {
+            DeviceDTO dto = new DeviceDTO();
+            dto.setId(deviceEntity.getId());
+            dto.setAgentId(deviceEntity.getAgentId());
+            dto.setMacAddress(deviceEntity.getMacAddress());
+            dto.setAlias(deviceEntity.getAlias());
+            dto.setAssistantName(deviceEntity.getAssistantName());
+            dto.setTtsModelId(deviceEntity.getTtsModelId());
+            dto.setTtsVoiceId(deviceEntity.getTtsVoiceId());
+            dto.setTtsVoiceType(deviceEntity.getTtsVoiceType());
+            dto.setSummaryMemory(deviceEntity.getSummaryMemory());
+            dto.setAutoUpdate(deviceEntity.getAutoUpdate());
+            dto.setAppVersion(deviceEntity.getAppVersion());
+            dto.setCreator(deviceEntity.getCreator());
+            dto.setCreateDate(deviceEntity.getCreateDate());
+            dto.setUpdateDate(deviceEntity.getUpdateDate());
+            dto.setUpdater(deviceEntity.getUpdater());
+
+            AgentEntity agentEntity = agentDao.selectById(deviceEntity.getAgentId());
+            if (ObjectUtils.isNotEmpty(agentEntity)) {
+                dto.setAgentName(agentEntity.getAgentName());
+            }
+            // 获取 TTS 音色名称
+            if (deviceEntity.getTtsVoiceType() == 0) {
+                // 官方
+                dto.setTtsVoiceName(timbreService.getTimbreNameById(deviceEntity.getTtsVoiceId()));
+            } else {
+                // 复刻
+                dto.setTtsVoiceName(voiceCloneService.getVoiceCloneNameById(deviceEntity.getTtsVoiceId()));
+            }
+
+            // 获取智能体最近的最后连接时长
+            dto.setLastConnectedAt(deviceEntity.getLastConnectedAt());
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -298,6 +365,13 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
         return maxDate;
     }
 
+    @Override
+    public List<DeviceEntity> getAgentDevices(String agentId) {
+        QueryWrapper<DeviceEntity> wrapper = new QueryWrapper<>();
+        wrapper.eq("agent_id", agentId);
+        return baseDao.selectList(wrapper);
+    }
+
     private String getDeviceCacheKey(String deviceId) {
         String safeDeviceId = deviceId.replace(":", "_").toLowerCase();
         String dataKey = String.format("ota:activation:data:%s", safeDeviceId);
@@ -384,7 +458,7 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
 
     /**
      * 比较两个版本号
-     * 
+     *
      * @param version1 版本1
      * @param version2 版本2
      * @return 如果version1 > version2返回1，version1 < version2返回-1，相等返回0

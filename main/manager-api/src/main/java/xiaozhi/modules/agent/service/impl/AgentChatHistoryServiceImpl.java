@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,15 +37,21 @@ public class AgentChatHistoryServiceImpl extends ServiceImpl<AiAgentChatHistoryD
     @Override
     public PageData<AgentChatSessionDTO> getSessionListByAgentId(Map<String, Object> params) {
         String agentId = (String) params.get("agentId");
+        String macAddress = (String) params.get("macAddress");
         int page = Integer.parseInt(params.get(Constant.PAGE).toString());
         int limit = Integer.parseInt(params.get(Constant.LIMIT).toString());
 
         // 构建查询条件
         QueryWrapper<AgentChatHistoryEntity> wrapper = new QueryWrapper<>();
-        wrapper.select("session_id", "MAX(created_at) as created_at", "COUNT(*) as chat_count")
-                .eq("agent_id", agentId)
-                .groupBy("session_id")
-                .orderByDesc("created_at");
+        wrapper.select("session_id", "MAX(created_at) as created_at", "COUNT(*) as chat_count");
+        if (StringUtils.isNotBlank(agentId)) {
+            wrapper.eq("agent_id", agentId);
+        }
+        if (StringUtils.isNotBlank(macAddress)) {
+            wrapper.eq("mac_address", macAddress);
+        }
+        wrapper.groupBy("session_id");
+        wrapper.orderByDesc("created_at");
 
         // 执行分页查询
         Page<Map<String, Object>> pageParam = new Page<>(page, limit);
@@ -62,12 +69,17 @@ public class AgentChatHistoryServiceImpl extends ServiceImpl<AiAgentChatHistoryD
     }
 
     @Override
-    public List<AgentChatHistoryDTO> getChatHistoryBySessionId(String agentId, String sessionId) {
+    public List<AgentChatHistoryDTO> getChatHistoryBySessionId(String agentId, String macAddress, String sessionId) {
         // 构建查询条件
         QueryWrapper<AgentChatHistoryEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("agent_id", agentId)
-                .eq("session_id", sessionId)
-                .orderByAsc("created_at");
+        if (StringUtils.isNotBlank(agentId)) {
+            wrapper.eq("agent_id", agentId);
+        }
+        if (StringUtils.isNotBlank(macAddress)) {
+            wrapper.eq("mac_address", macAddress);
+        }
+        wrapper.eq("session_id", sessionId);
+        wrapper.orderByAsc("created_at");
 
         // 查询聊天记录
         List<AgentChatHistoryEntity> historyList = list(wrapper);
@@ -78,15 +90,15 @@ public class AgentChatHistoryServiceImpl extends ServiceImpl<AiAgentChatHistoryD
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteByAgentId(String agentId, Boolean deleteAudio, Boolean deleteText) {
+    public void deleteByAgentId(String agentId, String macAddress, Boolean deleteAudio, Boolean deleteText) {
         if (deleteAudio) {
-            baseMapper.deleteAudioByAgentId(agentId);
+            baseMapper.deleteAudioByAgentId(agentId, macAddress);
         }
         if (deleteAudio && !deleteText) {
-            baseMapper.deleteAudioIdByAgentId(agentId);
+            baseMapper.deleteAudioIdByAgentId(agentId, macAddress);
         }
         if (deleteText) {
-            baseMapper.deleteHistoryByAgentId(agentId);
+            baseMapper.deleteHistoryByAgentId(agentId, macAddress);
         }
 
     }

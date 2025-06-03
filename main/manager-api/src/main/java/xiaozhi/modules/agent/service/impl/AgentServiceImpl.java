@@ -1,18 +1,11 @@
 package xiaozhi.modules.agent.service.impl;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 import xiaozhi.common.constant.Constant;
 import xiaozhi.common.page.PageData;
 import xiaozhi.common.redis.RedisKeys;
@@ -22,11 +15,18 @@ import xiaozhi.modules.agent.dao.AgentDao;
 import xiaozhi.modules.agent.dto.AgentDTO;
 import xiaozhi.modules.agent.entity.AgentEntity;
 import xiaozhi.modules.agent.service.AgentService;
+import xiaozhi.modules.device.dao.DeviceDao;
 import xiaozhi.modules.device.service.DeviceService;
 import xiaozhi.modules.model.service.ModelConfigService;
 import xiaozhi.modules.security.user.SecurityUser;
 import xiaozhi.modules.sys.enums.SuperAdminEnum;
 import xiaozhi.modules.timbre.service.TimbreService;
+import xiaozhi.modules.timbre.service.VoiceCloneService;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -36,6 +36,8 @@ public class AgentServiceImpl extends BaseServiceImpl<AgentDao, AgentEntity> imp
     private final ModelConfigService modelConfigService;
     private final RedisUtils redisUtils;
     private final DeviceService deviceService;
+    private final VoiceCloneService voiceCloneService;
+    private final DeviceDao deviceDao;
 
     @Override
     public PageData<AgentEntity> adminAgentList(Map<String, Object> params) {
@@ -109,7 +111,13 @@ public class AgentServiceImpl extends BaseServiceImpl<AgentDao, AgentEntity> imp
             dto.setMemModelId(agent.getMemModelId());
 
             // 获取 TTS 音色名称
-            dto.setTtsVoiceName(timbreModelService.getTimbreNameById(agent.getTtsVoiceId()));
+            if (agent.getTtsVoiceType() == 0) {
+                // 官方
+                dto.setTtsVoiceName(timbreModelService.getTimbreNameById(agent.getTtsVoiceId()));
+            } else {
+                // 复刻
+                dto.setTtsVoiceName(voiceCloneService.getVoiceCloneNameById(agent.getTtsVoiceId()));
+            }
 
             // 获取智能体最近的最后连接时长
             dto.setLastConnectedAt(deviceService.getLatestLastConnectionTime(agent.getId()));
@@ -166,5 +174,17 @@ public class AgentServiceImpl extends BaseServiceImpl<AgentDao, AgentEntity> imp
 
         // 检查是否是智能体的所有者
         return userId.equals(agent.getUserId());
+    }
+
+    @Override
+    public AgentEntity getDefaultAgent() {
+        return agentDao.getDefaultAgent();
+    }
+
+    @Override
+    public List<AgentEntity> getAgentsTemplate() {
+        QueryWrapper<AgentEntity> wrapper = new QueryWrapper<>();
+        List<AgentEntity> agents = agentDao.selectList(wrapper);
+        return agents;
     }
 }

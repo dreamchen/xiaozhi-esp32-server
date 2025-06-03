@@ -28,4 +28,12 @@ public interface AgentDao extends BaseDao<AgentEntity> {
             " WHERE d.mac_address = #{macAddress} " +
             " ORDER BY d.id DESC LIMIT 1")
     AgentEntity getDefaultAgentByMacAddress(@Param("macAddress") String macAddress);
+
+    /**
+     * 根据设备MAC地址查询对应设备的默认智能体信息
+     *
+     * @return 默认智能体信息
+     */
+    @Select(" SELECT * FROM ai_agent ORDER BY `sort` ASC LIMIT 1")
+    AgentEntity getDefaultAgent();
 }

@@ -51,6 +51,23 @@ export default {
                 });
             }).send();
     },
+    // 设置备注
+    setAlias(id, alias, callback) {
+        RequestService.sendRequest()
+            .url(`${getServiceUrl()}/device/setAlias/${id}?alias=${alias}`)
+            .method('PUT')
+            .success((res) => {
+                RequestService.clearRequestTime()
+                callback(res)
+            })
+            .networkFail((err) => {
+                console.error('设置备注失败:', err)
+                this.$message.error(err.msg || '设置备注失败')
+                RequestService.reAjaxFun(() => {
+                    this.setAlias(id, alias, callback)
+                })
+            }).send()
+    },
     enableOtaUpgrade(id, status, callback) {
         RequestService.sendRequest()
             .url(`${getServiceUrl()}/device/enableOta/${id}/${status}`)
@@ -65,6 +82,19 @@ export default {
                 RequestService.reAjaxFun(() => {
                     this.enableOtaUpgrade(id, status, callback)
                 })
+            }).send()
+    },
+    delMemSummary(id, callback) {
+        RequestService.sendRequest()
+            .url(`${getServiceUrl()}/device/delMemSummary/${id}`)
+            .method('DELETE')
+            .success((res) => {
+                RequestService.clearRequestTime()
+                callback(res)
+            })
+            .fail((err) => {
+                console.error('删除记忆体失败:', err)
+                this.$message.error(err.msg || '删除记忆体失败')
             }).send()
     },
 }

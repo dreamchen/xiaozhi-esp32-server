@@ -29,12 +29,15 @@
             </div>
             <div class="divider"></div>
 
-            <el-form ref="form" :model="form" label-width="72px">
+            <el-form ref="form" :model="form" label-width="84px">
               <div class="form-content">
                 <div class="form-grid">
                   <div class="form-column">
+                    <el-form-item label="智能体名称：">
+                      <el-input v-model="form.agentName" class="form-input"/>
+                    </el-form-item>
                     <el-form-item label="助手昵称：">
-                      <el-input v-model="form.agentName" class="form-input" maxlength="10" />
+                      <el-input v-model="form.assistantName" class="form-input"/>
                     </el-form-item>
                     <el-form-item label="角色模版：">
                       <div class="template-container">
@@ -45,14 +48,8 @@
                       </div>
                     </el-form-item>
                     <el-form-item label="角色介绍：">
-                      <el-input type="textarea" rows="9" resize="none" placeholder="请输入内容" v-model="form.systemPrompt"
+                      <el-input type="textarea" rows="13" resize="none" placeholder="请输入内容" v-model="form.systemPrompt"
                         maxlength="2000" show-word-limit class="form-textarea" />
-                    </el-form-item>
-
-                    <el-form-item label="记忆：">
-                      <el-input type="textarea" rows="6" resize="none" v-model="form.summaryMemory" maxlength="2000"
-                        show-word-limit class="form-textarea"
-                        :disabled="form.model.memModelId !== 'Memory_mem_local_short'" />
                     </el-form-item>
                     <el-form-item label="语言编码：" style="display: none;">
                       <el-input v-model="form.langCode" placeholder="请输入语言编码，如：zh_CN" maxlength="10" show-word-limit
@@ -156,10 +153,10 @@ export default {
       form: {
         agentCode: "",
         agentName: "",
+        assistantName: "",
         ttsVoiceId: "",
-        chatHistoryConf: 0,
+        ttsVoiceType: "",
         systemPrompt: "",
-        summaryMemory: "",
         langCode: "",
         language: "",
         sort: "",
@@ -208,17 +205,17 @@ export default {
       const configData = {
         agentCode: this.form.agentCode,
         agentName: this.form.agentName,
+        assistantName: this.form.assistantName,
         asrModelId: this.form.model.asrModelId,
         vadModelId: this.form.model.vadModelId,
         llmModelId: this.form.model.llmModelId,
         vllmModelId: this.form.model.vllmModelId,
         ttsModelId: this.form.model.ttsModelId,
         ttsVoiceId: this.form.ttsVoiceId,
-        chatHistoryConf: this.form.chatHistoryConf,
+        ttsVoiceType: this.form.ttsVoiceType,
         memModelId: this.form.model.memModelId,
         intentModelId: this.form.model.intentModelId,
         systemPrompt: this.form.systemPrompt,
-        summaryMemory: this.form.summaryMemory,
         langCode: this.form.langCode,
         language: this.form.language,
         sort: this.form.sort,
@@ -247,10 +244,10 @@ export default {
         this.form = {
           agentCode: "",
           agentName: "",
+          assistantName: "",
           ttsVoiceId: "",
-          chatHistoryConf: 0,
+          ttsVoiceType: "",
           systemPrompt: "",
-          summaryMemory: "",
           langCode: "",
           language: "",
           sort: "",
@@ -302,11 +299,10 @@ export default {
     applyTemplateData(templateData) {
       this.form = {
         ...this.form,
-        agentName: templateData.agentName || this.form.agentName,
+        assistantName: templateData.assistantName || this.form.assistantName,
         ttsVoiceId: templateData.ttsVoiceId || this.form.ttsVoiceId,
-        chatHistoryConf: templateData.chatHistoryConf || this.form.chatHistoryConf,
+        ttsVoiceType: templateData.ttsVoiceType || this.form.ttsVoiceType,
         systemPrompt: templateData.systemPrompt || this.form.systemPrompt,
-        summaryMemory: templateData.summaryMemory || this.form.summaryMemory,
         langCode: templateData.langCode || this.form.langCode,
         model: {
           ttsModelId: templateData.ttsModelId || this.form.model.ttsModelId,
@@ -318,6 +314,7 @@ export default {
           intentModelId: templateData.intentModelId || this.form.model.intentModelId
         }
       };
+      this.fetchVoiceOptions(templateData.ttsModelId);
     },
     fetchAgentConfig(agentId) {
       Api.agent.getDeviceConfig(agentId, ({ data }) => {
@@ -364,10 +361,24 @@ export default {
         if (data.code === 0 && data.data) {
           this.voiceOptions = data.data.map(voice => ({
             value: voice.id,
+            type: 0,
             label: voice.name
           }));
         } else {
           this.voiceOptions = [];
+        }
+      });
+      //获取自定义音色
+      Api.timbre.getCloneList({ttsModelId: modelId, page:1, limit: 100}, ({data}) => {
+        if (data.code === 0 && data.data) {
+          let _voiceOptions = data.data.list.map(voice => ({
+            value: voice.id,
+            type: 1,
+            label: voice.name
+          }));
+          if(_voiceOptions){
+            this.voiceOptions = _voiceOptions.concat(this.voiceOptions);
+          }
         }
       });
     },

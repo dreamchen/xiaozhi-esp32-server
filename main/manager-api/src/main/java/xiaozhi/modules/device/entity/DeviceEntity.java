@@ -43,6 +43,22 @@ public class DeviceEntity {
     @Schema(description = "智能体ID")
     private String agentId;
 
+    @Schema(description = "助手名称")
+    private String assistantName;
+
+    @Schema(description = "语音合成模型标识")
+    private String ttsModelId;
+
+    @Schema(description = "音色标识")
+    private String ttsVoiceId;
+
+    @Schema(description = "音色类型：0：官方、1：复刻")
+    private Integer ttsVoiceType;
+
+    @Schema(description = "总结记忆", example = "构建可生长的动态记忆网络，在有限空间内保留关键信息的同时，智能维护信息演变轨迹\n" +
+            "根据对话记录，总结user的重要信息，以便在未来的对话中提供更个性化的服务", required = false)
+    private String summaryMemory;
+
     @Schema(description = "固件版本号")
     private String appVersion;
 

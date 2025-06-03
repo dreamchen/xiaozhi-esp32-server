@@ -19,20 +19,23 @@ public interface AiAgentChatHistoryDao extends BaseMapper<AgentChatHistoryEntity
      * 根据智能体ID删除音频
      *
      * @param agentId 智能体ID
+     * @param macAddress  设备MAC地址
      */
-    void deleteAudioByAgentId(String agentId);
+    void deleteAudioByAgentId(String agentId, String macAddress);
 
     /**
      * 根据智能体ID删除聊天历史记录
      *
      * @param agentId 智能体ID
+     * @param macAddress  设备MAC地址
      */
-    void deleteHistoryByAgentId(String agentId);
+    void deleteHistoryByAgentId(String agentId, String macAddress);
 
     /**
      * 根据智能体ID删除音频ID
      *
      * @param agentId 智能体ID
+     * @param macAddress  设备MAC地址
      */
-    void deleteAudioIdByAgentId(String agentId);
+    void deleteAudioIdByAgentId(String agentId, String macAddress);
 }
