@@ -48,7 +48,7 @@
                       </div>
                     </el-form-item>
                     <el-form-item label="角色介绍：">
-                      <el-input type="textarea" rows="13" resize="none" placeholder="请输入内容" v-model="form.systemPrompt"
+                      <el-input type="textarea" rows="12" resize="none" placeholder="请输入内容" v-model="form.systemPrompt"
                         maxlength="2000" show-word-limit class="form-textarea" />
                     </el-form-item>
                     <el-form-item label="语言编码：" style="display: none;">

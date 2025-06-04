@@ -21,7 +21,7 @@ WAKEUP_CONFIG = {
     "file_name": "wakeup_words",
     "create_time": time.time(),
     "refresh_time": 10,
-    "words": ["你好小智", "你好啊小智", "小智你好", "小智"],
+    "words": ["你好小优", "你好啊小优", "小优你好", "小优小优", "小优"],
     "text": "",
 }
 

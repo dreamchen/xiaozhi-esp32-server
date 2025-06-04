@@ -24,7 +24,7 @@ public class AgentUpdateDTO implements Serializable {
     @Schema(description = "智能体名称", example = "客服助手", required = false)
     private String agentName;
 
-    @Schema(description = "助手名称", example = "小智", required = false)
+    @Schema(description = "助手名称", example = "小优", required = false)
     private String assistantName;
 
     @Schema(description = "语音识别模型标识", example = "asr_model_02", required = false)

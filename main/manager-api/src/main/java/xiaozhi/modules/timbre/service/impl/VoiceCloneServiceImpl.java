@@ -44,7 +44,10 @@ public class VoiceCloneServiceImpl extends BaseServiceImpl<VoiceCloneDao, VoiceC
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(Constant.PAGE, dto.getPage());
         params.put(Constant.LIMIT, dto.getLimit());
-        QueryWrapper<VoiceCloneEntity> qw = new QueryWrapper<VoiceCloneEntity>().eq("creator", user.getId());
+        QueryWrapper<VoiceCloneEntity> qw = new QueryWrapper<VoiceCloneEntity>();
+        if (user.getSuperAdmin() != 1){
+            qw.eq("creator", user.getId());
+        }
         if (StringUtils.isNotBlank(dto.getTtsModelId())) {
             qw.eq("tts_model_id", dto.getTtsModelId());
         }
@@ -80,7 +83,7 @@ public class VoiceCloneServiceImpl extends BaseServiceImpl<VoiceCloneDao, VoiceC
         entity.setTtsModelId(map.get("ttsModelId"));
         entity.setTtsVoice(map.get("data"));
         entity.setName(map.get("name"));
-        entity.setVoiceDemo(map.get("demoAudio"));
+        entity.setVoiceDemo(map.get("voiceDemo"));
         entity.setCreator(userDetail.getId());
         entity.setCreateDate(new Date());
         voiceCloneDao.insert(entity);

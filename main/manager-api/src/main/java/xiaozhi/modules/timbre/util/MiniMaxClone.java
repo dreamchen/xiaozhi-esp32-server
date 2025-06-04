@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,11 @@ import xiaozhi.modules.security.user.SecurityUser;
 import xiaozhi.modules.timbre.dao.VoiceCloneDao;
 import xiaozhi.modules.timbre.entity.VoiceCloneEntity;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +61,12 @@ public class MiniMaxClone extends BaseVoiceClone {
         if ("0".equals(map.get("code"))) {
             map.put("voiceId", voiceId);
             map.put("ttsModelId", ttsModelId);
+            String demoAudio = map.get("demoAudio");
+            if (StringUtils.isNotBlank(demoAudio)) {
+                //demo音频转存
+                String realPath = saveDemoAudio(ttsModelId + "_" + voiceId, demoAudio);
+                map.put("voiceDemo", realPath);
+            }
         }
         return map;
     }
@@ -108,7 +119,7 @@ public class MiniMaxClone extends BaseVoiceClone {
         Map<String, String> map = new HashMap<>();
 
         String bodyContent = "{\n" +
-                "            \"model\":\"speech-02-turbo\",\n" +
+                "            \"model\":\"speech-01-turbo\",\n" +
                 "            \"text\":\"" + demoText + "\",\n" +
                 "            \"stream\":false,\n" +
                 "            \"voice_setting\":{\n" +
@@ -345,4 +356,51 @@ public class MiniMaxClone extends BaseVoiceClone {
         // 返回补零后的语音ID字符串
         return voiceId;
     }
+
+    /**
+     * 保存演示音频文件到指定目录
+     *
+     * @param fileName     演示音频的文件名，不含扩展名
+     * @param demoAudioUrl 演示音频文件的URL或路径
+     * @return 返回保存后的音频文件的路径
+     * <p>
+     * 该方法首先尝试从提供的演示音频URL中读取文件，然后将其保存到上传目录中，
+     * 如果上传目录不存在，则会创建该目录保存时使用原始文件名加上".wav"扩展名
+     * 如果在文件操作过程中发生任何错误，将抛出RuntimeException
+     */
+    private String saveDemoAudio(String fileName, String demoAudioUrl) {
+        // 初始化文件路径为演示音频的URL
+        String realPath = demoAudioUrl;
+
+        try {
+            // 设置存储路径
+            String uploadDir = "upload/voice";
+            Path uploadPath = Paths.get(uploadDir);
+
+            // 如果目录不存在，创建目录
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // 使用fileName参数作为文件名，固定使用.wav扩展名
+            String realFileName = fileName + ".wav";
+            // 解析最终的文件保存路径
+            Path filePath = uploadPath.resolve(realFileName);
+            // 使用 try-with-resources 确保资源释放
+            // 创建文件输入流，用于读取演示音频文件
+            try (FileInputStream file = new FileInputStream(demoAudioUrl)) {
+                // 保存文件到指定路径
+                Files.copy(file, filePath);
+            }
+            // 更新实际文件路径为保存后的路径
+            realPath = filePath.toString();
+        } catch (Exception e) {
+            // 如果发生IO错误，抛出RuntimeException
+            log.error("保存演示音频文件失败：" + e.getMessage(), e);
+        }
+
+        // 返回保存后的文件路径
+        return realPath;
+    }
+
 }

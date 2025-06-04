@@ -233,6 +233,7 @@ public class DeviceServiceImpl extends BaseServiceImpl<DeviceDao, DeviceEntity> 
             dto.setId(deviceEntity.getId());
             dto.setAgentId(deviceEntity.getAgentId());
             dto.setMacAddress(deviceEntity.getMacAddress());
+            dto.setBoard(deviceEntity.getBoard());
             dto.setAlias(deviceEntity.getAlias());
             dto.setAssistantName(deviceEntity.getAssistantName());
             dto.setTtsModelId(deviceEntity.getTtsModelId());

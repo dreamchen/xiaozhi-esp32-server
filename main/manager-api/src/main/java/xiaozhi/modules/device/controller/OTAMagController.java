@@ -252,7 +252,7 @@ public class OTAMagController {
             String md5 = calculateMD5(file);
 
             // 设置存储路径
-            String uploadDir = "uploadfile";
+            String uploadDir = "upload/ota";
             Path uploadPath = Paths.get(uploadDir);
 
             // 如果目录不存在，创建目录

@@ -34,7 +34,11 @@
                                     <i  v-if="!scope.row.isEdit" class="el-icon-edit" @click="startEditVoiceName(scope.$index, scope.row)"></i>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="试听" prop="voiceDemo" align="center"></el-table-column>
+                            <el-table-column label="试听" prop="voiceDemo" align="center" width="260">
+                                <template slot-scope="scope"> 
+                                    <audio :src="scope.row.voiceDemo" controls></audio>
+                                </template>
+                            </el-table-column>
                             <el-table-column label="归属模型ID" prop="ttsModelId" align="center"></el-table-column>
                             <el-table-column label="归属模型名称" prop="ttsModelName" align="center"></el-table-column>
                             <el-table-column label="创建时间" prop="createDate" align="center">

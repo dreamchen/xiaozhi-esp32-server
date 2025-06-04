@@ -64,7 +64,7 @@ public class AgentController {
     @RequiresPermissions("sys:role:normal")
     public Result<List<AgentDTO>> getUserAgents() {
         UserDetail user = SecurityUser.getUser();
-        List<AgentDTO> agents = agentService.getUserAgents(user.getId());
+        List<AgentDTO> agents = agentService.getUserAgents(user.getSuperAdmin() == 1 ? null : user.getId());
         return new Result<List<AgentDTO>>().ok(agents);
     }
 

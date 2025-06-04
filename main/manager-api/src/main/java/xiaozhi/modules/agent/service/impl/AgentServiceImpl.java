@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import xiaozhi.common.constant.Constant;
@@ -90,7 +91,9 @@ public class AgentServiceImpl extends BaseServiceImpl<AgentDao, AgentEntity> imp
     @Override
     public List<AgentDTO> getUserAgents(Long userId) {
         QueryWrapper<AgentEntity> wrapper = new QueryWrapper<>();
-        wrapper.eq("user_id", userId);
+        if(ObjectUtils.isNotEmpty(userId)) {
+            wrapper.eq("user_id", userId);
+        }
         List<AgentEntity> agents = agentDao.selectList(wrapper);
         return agents.stream().map(agent -> {
             AgentDTO dto = new AgentDTO();
