@@ -148,6 +148,7 @@ tmp
 main/xiaozhi-server/data
 
 main/manager-web/node_modules
+main/manager-mobile/node_modules
 .config.yaml
 .secrets.yaml
 .private_config.yaml
