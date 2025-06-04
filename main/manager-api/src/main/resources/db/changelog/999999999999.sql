@@ -123,12 +123,4 @@ UPDATE `sys_params` SET `param_code` = 'xiaoyou',`remark` = '小优类型' WHERE
 
 UPDATE `sys_params` SET `param_value` = '北京' WHERE `id` = 401 AND `param_code` = 'plugins.get_weather.default_location';
 
-UPDATE `sys_params` SET `param_value` = 'LTAI5t7Gip1hrew2STMQwaK7' WHERE `id` = 610 AND `param_code` = 'aliyun.sms.access_key_id';
-
-UPDATE `sys_params` SET `param_value` = 'Rqr6HsxY5vzQDDmOs327QM6MTiFefa' WHERE `id` = 611 AND `param_code` = 'aliyun.sms.access_key_secret';
-
-UPDATE `sys_params` SET `param_value` = '优享生活' WHERE `id` = 612 AND `param_code` = 'aliyun.sms.sign_name';
-
-UPDATE `sys_params` SET `param_value` = 'SMS_319300013' WHERE `id` = 613 AND `param_code` = 'aliyun.sms.sms_code_template_code';
-
 SET FOREIGN_KEY_CHECKS = 1;
