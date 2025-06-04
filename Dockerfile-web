@@ -1,6 +1,6 @@
 # 第一阶段：构建Vue前端
 # 构建Web
-FROM node:18 as web-builder
+FROM node:18 AS web-builder
 WORKDIR /app/web
 COPY main/manager-web/package*.json ./
 RUN npm install
@@ -14,7 +14,7 @@ COPY main/manager-mobile .
 RUN npm run build:h5
 
 # 第二阶段：构建Java后端
-FROM maven:3.9.4-eclipse-temurin-21 as api-builder
+FROM maven:3.9.4-eclipse-temurin-21 AS api-builder
 WORKDIR /app
 COPY main/manager-api/pom.xml .
 COPY main/manager-api/src ./src
