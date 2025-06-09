@@ -123,4 +123,6 @@ UPDATE `sys_params` SET `param_code` = 'xiaoyou',`remark` = '小优类型' WHERE
 
 UPDATE `sys_params` SET `param_value` = '北京' WHERE `id` = 401 AND `param_code` = 'plugins.get_weather.default_location';
 
+UPDATE `sys_params` SET param_value = '你好小优;小优同学;小优小优;嘿你好呀' WHERE param_code = 'wakeup_words';
+
 SET FOREIGN_KEY_CHECKS = 1;
