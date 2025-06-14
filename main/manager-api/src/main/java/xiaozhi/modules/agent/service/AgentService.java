@@ -5,8 +5,11 @@ import java.util.Map;
 
 import xiaozhi.common.page.PageData;
 import xiaozhi.common.service.BaseService;
+import xiaozhi.modules.agent.dto.AgentCreateDTO;
 import xiaozhi.modules.agent.dto.AgentDTO;
+import xiaozhi.modules.agent.dto.AgentUpdateDTO;
 import xiaozhi.modules.agent.entity.AgentEntity;
+import xiaozhi.modules.agent.vo.AgentInfoVO;
 import xiaozhi.modules.device.entity.DeviceEntity;
 
 /**
@@ -31,7 +34,7 @@ public interface AgentService extends BaseService<AgentEntity> {
      * @param id 智能体ID
      * @return 智能体实体
      */
-    AgentEntity getAgentById(String id);
+    AgentInfoVO getAgentById(String id);
 
     /**
      * 插入智能体
@@ -80,6 +83,22 @@ public interface AgentService extends BaseService<AgentEntity> {
      * @return 是否有权限
      */
     boolean checkAgentPermission(String agentId, Long userId);
+
+    /**
+     * 更新智能体
+     *
+     * @param agentId 智能体ID
+     * @param dto     更新智能体所需的信息
+     */
+    void updateAgentById(String agentId, AgentUpdateDTO dto);
+
+    /**
+     * 创建智能体
+     *
+     * @param dto 创建智能体所需的信息
+     * @return 创建的智能体ID
+     */
+    String createAgent(AgentCreateDTO dto);
 
     /**
      * 查询默认智能体信息

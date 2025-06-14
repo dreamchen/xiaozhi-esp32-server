@@ -53,6 +53,6 @@
 </script>
 
 <style lang="scss">
-	@use '@/uni_modules/zebra-swiper/index.scss';
-	@use "@/uni_modules/zebra-swiper/modules/pagination/pagination.scss";
+	@use '@zebra-ui/swiper/index.scss';
+	@use "@zebra-ui/swiper/modules/pagination/pagination.scss";
 </style>

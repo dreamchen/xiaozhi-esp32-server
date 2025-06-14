@@ -400,7 +400,7 @@ class ConnectionHandler:
             )
             private_config["delete_audio"] = bool(self.config.get("delete_audio", True))
             self.logger.bind(tag=TAG).info(
-                f"{time.time() - begin_time} 秒，获取差异化配置成功: {json.dumps(filter_sensitive_info(private_config), ensure_ascii=False)}"
+                f"{time.time() - begin_time:.3f} 秒，获取差异化配置成功: {json.dumps(filter_sensitive_info(private_config), ensure_ascii=False)}"
             )
         except DeviceNotFoundException as e:
             self.need_bind = True
@@ -424,6 +424,16 @@ class ConnectionHandler:
         init_vad = check_vad_update(self.common_config, private_config)
         init_asr = check_asr_update(self.common_config, private_config)
 
+        if init_vad:
+            self.config["VAD"] = private_config["VAD"]
+            self.config["selected_module"]["VAD"] = private_config["selected_module"][
+                "VAD"
+            ]
+        if init_asr:
+            self.config["ASR"] = private_config["ASR"]
+            self.config["selected_module"]["ASR"] = private_config["selected_module"][
+                "ASR"
+            ]
         if private_config.get("TTS", None) is not None:
             init_tts = True
             self.config["TTS"] = private_config["TTS"]
@@ -445,9 +455,17 @@ class ConnectionHandler:
         if private_config.get("Intent", None) is not None:
             init_intent = True
             self.config["Intent"] = private_config["Intent"]
-            self.config["selected_module"]["Intent"] = private_config[
-                "selected_module"
-            ]["Intent"]
+            model_intent = private_config.get("selected_module", {}).get("Intent", {})
+            self.config["selected_module"]["Intent"] = model_intent
+            # 加载插件配置
+            if model_intent != "Intent_nointent":
+                plugin_from_server = private_config.get("plugins", {})
+                for plugin, config_str in plugin_from_server.items():
+                    plugin_from_server[plugin] = json.loads(config_str)
+                self.config["plugins"] = plugin_from_server
+                self.config["Intent"][self.config["selected_module"]["Intent"]][
+                    "functions"
+                ] = plugin_from_server.keys()
         if private_config.get("prompt", None) is not None:
             self.config["prompt"] = private_config["prompt"]
         if private_config.get("summaryMemory", None) is not None:
@@ -582,7 +600,8 @@ class ConnectionHandler:
         self.dialogue.update_system_message(self.prompt)
 
     def chat(self, query, tool_call=False):
-        self.logger.bind(tag=TAG).info(f"大模型收到用户消息: {query}")
+        start_time = time.time()
+        self.logger.bind(tag=TAG).info(f"大模型收到用户消息: {query}, tool_call: {tool_call}")
         self.llm_finish_task = False
 
         if not tool_call:
@@ -612,7 +631,7 @@ class ConnectionHandler:
             uuid_str = str(uuid.uuid4()).replace("-", "")
             self.sentence_id = uuid_str
 
-            if functions is not None:
+            if self.intent_type == "function_call" and functions is not None:
                 # 使用支持functions的streaming接口
                 llm_responses = self.llm.response_with_functions(
                     self.session_id,
@@ -628,6 +647,9 @@ class ConnectionHandler:
             self.logger.bind(tag=TAG).error(f"LLM 处理出错 {query}: {e}")
             return None
 
+        self.logger.bind(tag=TAG).info(
+            f"大模型处理耗时: {time.time() - start_time:.3f}s | llm_responses:  {llm_responses} | query: {query} | memory_str: {memory_str}"
+        )
         # 处理流式响应
         tool_call_flag = False
         function_name = None
@@ -639,7 +661,7 @@ class ConnectionHandler:
         for response in llm_responses:
             if self.client_abort:
                 break
-            if functions is not None:
+            if self.intent_type == "function_call" and functions is not None:
                 content, tools_call = response
                 if "content" in response:
                     content = response["content"]
@@ -748,6 +770,11 @@ class ConnectionHandler:
                     )
                 self._handle_function_result(result, function_call_data)
 
+
+        self.logger.bind(tag=TAG).info(
+            f"大模型处理耗时: {time.time() - start_time:.3f}s | response_message:  {response_message}"
+        )
+
         # 存储对话内容
         if len(response_message) > 0:
             self.dialogue.put(
@@ -762,6 +789,10 @@ class ConnectionHandler:
                 )
             )
         self.llm_finish_task = True
+
+        self.logger.bind(tag=TAG).info(
+            f"大模型处理耗时: {time.time() - start_time:.3f}s | tool_call_flag: {tool_call_flag} | function_call_data:  {function_call_data} | result: {result}"
+        )
         self.logger.bind(tag=TAG).debug(
             json.dumps(self.dialogue.get_llm_dialogue(), indent=4, ensure_ascii=False)
         )

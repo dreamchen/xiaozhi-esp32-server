@@ -53,7 +53,11 @@ async def startToChat(conn, text):
         await handleAbortMessage(conn)
 
     # 首先进行意图分析
+    start_time = time.time()
     intent_handled = await handle_user_intent(conn, text)
+    conn.logger.bind(tag=TAG).info(
+        f"意图分析耗时: {time.time() - start_time:.3f}s | intent_handled: {intent_handled} | text: {text} | intent_type:  {conn.intent_type}"
+    )
 
     if intent_handled:
         # 如果意图已被处理，不再进行聊天

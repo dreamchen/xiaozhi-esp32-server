@@ -32,7 +32,7 @@ class CaptureOutput:
 
         # 将捕获到的内容通过 logger 输出
         if self.output:
-            logger.bind(tag=TAG).info(self.output.strip())
+            logger.bind(tag=TAG).info(f"output: {self.output.strip()}")
 
 
 class ASRProvider(ASRProviderBase):
@@ -65,6 +65,7 @@ class ASRProvider(ASRProviderBase):
         self, opus_data: List[bytes], session_id: str, audio_format="opus"
     ) -> Tuple[Optional[str], Optional[str]]:
         """语音转文本主处理逻辑"""
+        print(f"开始识别speech_to_text, audio_format:  {audio_format}")
         file_path = None
         retry_count = 0
 
@@ -78,20 +79,24 @@ class ASRProvider(ASRProviderBase):
 
                 combined_pcm_data = b"".join(pcm_data)
 
+                print(f"开始识别speech_to_text2, len:  {len(combined_pcm_data)}")
                 # 检查磁盘空间
                 if not self.delete_audio_file:
                     free_space = shutil.disk_usage(self.output_dir).free
                     if free_space < len(combined_pcm_data) * 2:  # 预留2倍空间
                         raise OSError("磁盘空间不足")
 
+                print("开始识别speech_to_text3")
                 # 判断是否保存为WAV文件
                 if self.delete_audio_file:
                     pass
                 else:
                     file_path = self.save_audio_to_file(pcm_data, session_id)
 
+                print("开始识别speech_to_text4")
                 # 语音识别
                 start_time = time.time()
+                # result =  [{'key': 'rand_key_1t9EwL56nGisi', 'text': '<|zh|><|NEUTRAL|><|Speech|><|withitn|>你好你好，你是谁？'}]
                 result = self.model.generate(
                     input=combined_pcm_data,
                     cache={},
@@ -99,8 +104,11 @@ class ASRProvider(ASRProviderBase):
                     use_itn=True,
                     batch_size_s=60,
                 )
+                print(f"开始识别speech_to_text5, result:  {result}")
                 text = rich_transcription_postprocess(result[0]["text"])
-                logger.bind(tag=TAG).debug(
+
+                print("开始识别speech_to_text6")
+                logger.bind(tag=TAG).info(
                     f"语音识别耗时: {time.time() - start_time:.3f}s | 结果: {text}"
                 )
 

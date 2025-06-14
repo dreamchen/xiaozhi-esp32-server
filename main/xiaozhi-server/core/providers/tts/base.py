@@ -211,6 +211,7 @@ class TTSProviderBase(ABC):
         while not self.conn.stop_event.is_set():
             try:
                 message = self.tts_text_queue.get(timeout=1)
+                logger.bind(tag=TAG).info(f"TTS文本处理线程 sentence_type: {message.sentence_type} | content_type: {message.content_type} | content_detail: {message.content_detail}")
                 if self.conn.client_abort:
                     logger.bind(tag=TAG).info("收到打断信息，终止TTS文本处理线程")
                     continue

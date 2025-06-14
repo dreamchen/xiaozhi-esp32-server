@@ -69,7 +69,7 @@ const list = ref(
     })
   )
   
-import { Autoplay,Pagination } from '@/uni_modules/zebra-swiper/modules'
+import { Autoplay,Pagination } from '@zebra-ui/swiper/modules'
 const modules = ref([Autoplay,Pagination])
 </script>
 

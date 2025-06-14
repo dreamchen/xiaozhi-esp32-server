@@ -1,7 +1,7 @@
 // ajax.js
 
 // 引入 uni-ajax 模块
-import ajax from '@/uni_modules/u-ajax'
+import ajax from 'uni-ajax'
 
 // 创建请求实例
 const instance = ajax.create({

@@ -1,11 +1,15 @@
+import time
 import os
 import uuid
 import json
 import requests
 from datetime import datetime
+from config.logger import setup_logging
 from core.providers.tts.base import TTSProviderBase
 from core.utils.util import parse_string_to_list
 
+TAG = __name__
+logger = setup_logging()
 
 class TTSProvider(TTSProviderBase):
     def __init__(self, config, delete_audio_file):
@@ -61,6 +65,7 @@ class TTSProvider(TTSProviderBase):
         )
 
     async def text_to_speak(self, text, output_file):
+        start_time = time.time()
         request_json = {
             "model": self.model,
             "text": text,
@@ -80,6 +85,10 @@ class TTSProvider(TTSProviderBase):
             )
             # 检查返回请求数据的status_code是否为0
             if resp.json()["base_resp"]["status_code"] == 0:
+                traceId = resp.json()["trace_id"]
+                logger.bind(tag=TAG).info(
+                    f"语音合成耗时: {time.time() - start_time:.3f}s | traceId: {traceId} | text: {text}"
+                )
                 data = resp.json()["data"]["audio"]
                 audio_bytes = bytes.fromhex(data)
                 if output_file:
