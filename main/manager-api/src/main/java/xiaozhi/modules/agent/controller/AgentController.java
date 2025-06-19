@@ -32,11 +32,7 @@ import xiaozhi.common.redis.RedisUtils;
 import xiaozhi.common.user.UserDetail;
 import xiaozhi.common.utils.Result;
 import xiaozhi.common.utils.ResultUtils;
-import xiaozhi.modules.agent.dto.AgentChatHistoryDTO;
-import xiaozhi.modules.agent.dto.AgentChatSessionDTO;
-import xiaozhi.modules.agent.dto.AgentCreateDTO;
-import xiaozhi.modules.agent.dto.AgentDTO;
-import xiaozhi.modules.agent.dto.AgentUpdateDTO;
+import xiaozhi.modules.agent.dto.*;
 import xiaozhi.modules.agent.entity.AgentEntity;
 import xiaozhi.modules.agent.entity.AgentTemplateEntity;
 import xiaozhi.modules.agent.service.AgentChatAudioService;
@@ -114,19 +110,18 @@ public class AgentController {
         if (StringUtils.isBlank(macAddress)) {
             return new Result<Void>().error("参数不能为空");
         }
-        return updateAgentById(null, macAddress, dto);
+        agentService.updateAgentById(null, macAddress, dto);
+        return new Result<>();
     }
 
     @PutMapping("/updateMobile/{macAddress}")
     @Operation(summary = "根据设备id更新智能体")
-    public Result<Void> updateByDeviceId(@PathVariable String macAddress, @RequestBody @Valid AgentMemoryDTO dto) {
-        DeviceEntity device = deviceService.getDeviceByMacAddress(macAddress);
-        if (device == null) {
-            return new Result<>();
+    @RequiresPermissions("sys:role:normal")
+    public Result<Void> updateByDeviceIdMobile(@PathVariable String macAddress, @RequestBody @Valid AgentUpdateDTO dto) {
+        if (StringUtils.isBlank(macAddress)) {
+            return new Result<Void>().error("参数不能为空");
         }
-        AgentUpdateDTO agentUpdateDTO = new AgentUpdateDTO();
-        agentUpdateDTO.setSummaryMemory(dto.getSummaryMemory());
-        agentService.updateAgentById(device.getAgentId(), agentUpdateDTO);
+        agentService.updateAgentById(null, macAddress, dto);
         return new Result<>();
     }
 
@@ -134,7 +129,10 @@ public class AgentController {
     @Operation(summary = "更新智能体")
     @RequiresPermissions("sys:role:normal")
     public Result<Void> update(@PathVariable String id, @RequestBody @Valid AgentUpdateDTO dto) {
-        agentService.updateAgentById(id, dto);
+        if (StringUtils.isBlank(id)) {
+            return new Result<Void>().error("参数不能为空");
+        }
+        agentService.updateAgentById(id, null, dto);
         return new Result<>();
     }
 
@@ -145,7 +143,7 @@ public class AgentController {
         // 先删除关联的设备
         deviceService.deleteByAgentId(id);
         // 删除关联的聊天记录
-        agentChatHistoryService.deleteByAgentId(id, true, true);
+        agentChatHistoryService.deleteByAgentId(id, null, true, true);
         // 删除关联的插件
         agentPluginMappingService.deleteByAgentId(id);
         // 再删除智能体
@@ -192,7 +190,7 @@ public class AgentController {
         }
 
         // 查询聊天记录
-        List<AgentChatHistoryDTO> result = agentChatHistoryService.getChatHistoryBySessionId(id,null,  sessionId);
+        List<AgentChatHistoryDTO> result = agentChatHistoryService.getChatHistoryBySessionId(id, null, sessionId);
         return new Result<List<AgentChatHistoryDTO>>().ok(result);
     }
 

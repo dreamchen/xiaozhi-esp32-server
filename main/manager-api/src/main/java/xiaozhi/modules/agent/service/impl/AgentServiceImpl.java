@@ -29,6 +29,7 @@ import xiaozhi.common.service.impl.BaseServiceImpl;
 import xiaozhi.common.user.UserDetail;
 import xiaozhi.common.utils.ConvertUtils;
 import xiaozhi.common.utils.JsonUtils;
+import xiaozhi.common.utils.Result;
 import xiaozhi.modules.agent.dao.AgentDao;
 import xiaozhi.modules.agent.dto.AgentCreateDTO;
 import xiaozhi.modules.agent.dto.AgentDTO;
@@ -42,6 +43,7 @@ import xiaozhi.modules.agent.service.AgentService;
 import xiaozhi.modules.agent.service.AgentTemplateService;
 import xiaozhi.modules.agent.vo.AgentInfoVO;
 import xiaozhi.modules.device.dao.DeviceDao;
+import xiaozhi.modules.device.entity.DeviceEntity;
 import xiaozhi.modules.device.service.DeviceService;
 import xiaozhi.modules.model.dto.ModelProviderDTO;
 import xiaozhi.modules.model.service.ModelConfigService;
@@ -218,132 +220,172 @@ public class AgentServiceImpl extends BaseServiceImpl<AgentDao, AgentEntity> imp
     // 根据id更新智能体信息
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateAgentById(String agentId, AgentUpdateDTO dto) {
-        // 先查询现有实体
-        AgentEntity existingEntity = this.getAgentById(agentId);
-        if (existingEntity == null) {
-            throw new RuntimeException("智能体不存在");
-        }
+    public void updateAgentById(String agentId, String macAddress, AgentUpdateDTO dto) {
+        if (StringUtils.isNotBlank(agentId)) {
+            // 先查询现有实体
+            AgentEntity existingEntity = this.getAgentById(agentId);
+            if (existingEntity == null) {
+                throw new RuntimeException("智能体不存在");
+            }
 
-        // 只更新提供的非空字段
-        if (dto.getAgentName() != null) {
-            existingEntity.setAgentName(dto.getAgentName());
-        }
-        if (dto.getAgentCode() != null) {
-            existingEntity.setAgentCode(dto.getAgentCode());
-        }
-        if (dto.getAsrModelId() != null) {
-            existingEntity.setAsrModelId(dto.getAsrModelId());
-        }
-        if (dto.getVadModelId() != null) {
-            existingEntity.setVadModelId(dto.getVadModelId());
-        }
-        if (dto.getLlmModelId() != null) {
-            existingEntity.setLlmModelId(dto.getLlmModelId());
-        }
-        if (dto.getVllmModelId() != null) {
-            existingEntity.setVllmModelId(dto.getVllmModelId());
-        }
-        if (dto.getTtsModelId() != null) {
-            existingEntity.setTtsModelId(dto.getTtsModelId());
-        }
-        if (dto.getTtsVoiceId() != null) {
-            existingEntity.setTtsVoiceId(dto.getTtsVoiceId());
-        }
-        if (dto.getMemModelId() != null) {
-            existingEntity.setMemModelId(dto.getMemModelId());
-        }
-        if (dto.getIntentModelId() != null) {
-            existingEntity.setIntentModelId(dto.getIntentModelId());
-        }
-        if (dto.getSystemPrompt() != null) {
-            existingEntity.setSystemPrompt(dto.getSystemPrompt());
-        }
-        if (dto.getSummaryMemory() != null) {
-            existingEntity.setSummaryMemory(dto.getSummaryMemory());
-        }
-        if (dto.getChatHistoryConf() != null) {
-            existingEntity.setChatHistoryConf(dto.getChatHistoryConf());
-        }
-        if (dto.getLangCode() != null) {
-            existingEntity.setLangCode(dto.getLangCode());
-        }
-        if (dto.getLanguage() != null) {
-            existingEntity.setLanguage(dto.getLanguage());
-        }
-        if (dto.getSort() != null) {
-            existingEntity.setSort(dto.getSort());
-        }
+            // 只更新提供的非空字段
+            if (dto.getAssistantName() != null) {
+                existingEntity.setAssistantName(dto.getAssistantName());
+            }
+            // 只更新提供的非空字段
+            if (dto.getAgentName() != null) {
+                existingEntity.setAgentName(dto.getAgentName());
+            }
+            if (dto.getAgentCode() != null) {
+                existingEntity.setAgentCode(dto.getAgentCode());
+            }
+            if (dto.getAsrModelId() != null) {
+                existingEntity.setAsrModelId(dto.getAsrModelId());
+            }
+            if (dto.getVadModelId() != null) {
+                existingEntity.setVadModelId(dto.getVadModelId());
+            }
+            if (dto.getLlmModelId() != null) {
+                existingEntity.setLlmModelId(dto.getLlmModelId());
+            }
+            if (dto.getVllmModelId() != null) {
+                existingEntity.setVllmModelId(dto.getVllmModelId());
+            }
+            if (dto.getTtsModelId() != null) {
+                existingEntity.setTtsModelId(dto.getTtsModelId());
+            }
+            if (dto.getTtsVoiceId() != null) {
+                existingEntity.setTtsVoiceId(dto.getTtsVoiceId());
+            }
+            if (dto.getTtsVoiceType() != null) {
+                existingEntity.setTtsVoiceType(dto.getTtsVoiceType());
+            }
+            if (dto.getMemModelId() != null) {
+                existingEntity.setMemModelId(dto.getMemModelId());
+            }
+            if (dto.getIntentModelId() != null) {
+                existingEntity.setIntentModelId(dto.getIntentModelId());
+            }
+            if (dto.getSystemPrompt() != null) {
+                existingEntity.setSystemPrompt(dto.getSystemPrompt());
+            }
+            if (dto.getChatHistoryConf() != null) {
+                existingEntity.setChatHistoryConf(dto.getChatHistoryConf());
+            }
+            if (dto.getLangCode() != null) {
+                existingEntity.setLangCode(dto.getLangCode());
+            }
+            if (dto.getLanguage() != null) {
+                existingEntity.setLanguage(dto.getLanguage());
+            }
+            if (dto.getSort() != null) {
+                existingEntity.setSort(dto.getSort());
+            }
 
-        // 更新函数插件信息
-        List<AgentUpdateDTO.FunctionInfo> functions = dto.getFunctions();
-        if (functions != null) {
-            // 1. 收集本次提交的 pluginId
-            List<String> newPluginIds = functions.stream()
-                    .map(AgentUpdateDTO.FunctionInfo::getPluginId)
-                    .toList();
+            // 更新函数插件信息
+            List<AgentUpdateDTO.FunctionInfo> functions = dto.getFunctions();
+            if (functions != null) {
+                // 1. 收集本次提交的 pluginId
+                List<String> newPluginIds = functions.stream()
+                        .map(AgentUpdateDTO.FunctionInfo::getPluginId)
+                        .toList();
 
-            // 2. 查询当前agent现有的所有映射
-            List<AgentPluginMapping> existing = agentPluginMappingService.list(
-                    new QueryWrapper<AgentPluginMapping>()
-                            .eq("agent_id", agentId));
-            Map<String, AgentPluginMapping> existMap = existing.stream()
-                    .collect(Collectors.toMap(AgentPluginMapping::getPluginId, Function.identity()));
+                // 2. 查询当前agent现有的所有映射
+                List<AgentPluginMapping> existing = agentPluginMappingService.list(
+                        new QueryWrapper<AgentPluginMapping>()
+                                .eq("agent_id", agentId));
+                Map<String, AgentPluginMapping> existMap = existing.stream()
+                        .collect(Collectors.toMap(AgentPluginMapping::getPluginId, Function.identity()));
 
-            // 3. 构造所有要 保存或更新 的实体
-            List<AgentPluginMapping> allToPersist = functions.stream().map(info -> {
-                AgentPluginMapping m = new AgentPluginMapping();
-                m.setAgentId(agentId);
-                m.setPluginId(info.getPluginId());
-                m.setParamInfo(JsonUtils.toJsonString(info.getParamInfo()));
-                AgentPluginMapping old = existMap.get(info.getPluginId());
-                if (old != null) {
-                    // 已存在，设置id表示更新
-                    m.setId(old.getId());
+                // 3. 构造所有要 保存或更新 的实体
+                List<AgentPluginMapping> allToPersist = functions.stream().map(info -> {
+                    AgentPluginMapping m = new AgentPluginMapping();
+                    m.setAgentId(agentId);
+                    m.setPluginId(info.getPluginId());
+                    m.setParamInfo(JsonUtils.toJsonString(info.getParamInfo()));
+                    AgentPluginMapping old = existMap.get(info.getPluginId());
+                    if (old != null) {
+                        // 已存在，设置id表示更新
+                        m.setId(old.getId());
+                    }
+                    return m;
+                }).toList();
+
+                // 4. 拆分：已有ID的走更新，无ID的走插入
+                List<AgentPluginMapping> toUpdate = allToPersist.stream()
+                        .filter(m -> m.getId() != null)
+                        .toList();
+                List<AgentPluginMapping> toInsert = allToPersist.stream()
+                        .filter(m -> m.getId() == null)
+                        .toList();
+
+                if (!toUpdate.isEmpty()) {
+                    agentPluginMappingService.updateBatchById(toUpdate);
                 }
-                return m;
-            }).toList();
+                if (!toInsert.isEmpty()) {
+                    agentPluginMappingService.saveBatch(toInsert);
+                }
 
-            // 4. 拆分：已有ID的走更新，无ID的走插入
-            List<AgentPluginMapping> toUpdate = allToPersist.stream()
-                    .filter(m -> m.getId() != null)
-                    .toList();
-            List<AgentPluginMapping> toInsert = allToPersist.stream()
-                    .filter(m -> m.getId() == null)
-                    .toList();
-
-            if (!toUpdate.isEmpty()) {
-                agentPluginMappingService.updateBatchById(toUpdate);
-            }
-            if (!toInsert.isEmpty()) {
-                agentPluginMappingService.saveBatch(toInsert);
+                // 5. 删除本次不在提交列表里的插件映射
+                List<Long> toDelete = existing.stream()
+                        .filter(old -> !newPluginIds.contains(old.getPluginId()))
+                        .map(AgentPluginMapping::getId)
+                        .toList();
+                if (!toDelete.isEmpty()) {
+                    agentPluginMappingService.removeBatchByIds(toDelete);
+                }
             }
 
-            // 5. 删除本次不在提交列表里的插件映射
-            List<Long> toDelete = existing.stream()
-                    .filter(old -> !newPluginIds.contains(old.getPluginId()))
-                    .map(AgentPluginMapping::getId)
-                    .toList();
-            if (!toDelete.isEmpty()) {
-                agentPluginMappingService.removeBatchByIds(toDelete);
+            // 设置更新者信息
+            UserDetail user = SecurityUser.getUser();
+            existingEntity.setUpdater(user.getId());
+            existingEntity.setUpdatedAt(new Date());
+
+            // 更新记忆策略
+            if (existingEntity.getMemModelId() == null || existingEntity.getMemModelId().equals(Constant.MEMORY_NO_MEM)) {
+                // 删除所有记录
+                agentChatHistoryService.deleteByAgentId(existingEntity.getId(), null, true, true);
+            } else if (existingEntity.getChatHistoryConf() != null && existingEntity.getChatHistoryConf() == 1) {
+                // 删除音频数据
+                agentChatHistoryService.deleteByAgentId(existingEntity.getId(), null, true, false);
             }
+            this.updateById(existingEntity);
         }
 
-        // 设置更新者信息
-        UserDetail user = SecurityUser.getUser();
-        existingEntity.setUpdater(user.getId());
-        existingEntity.setUpdatedAt(new Date());
+        if (StringUtils.isNotBlank(macAddress)) {
+            // 先查询现有实体
+            DeviceEntity existingEntity = deviceService.getDeviceByMacAddress(macAddress);
+            if (existingEntity == null) {
+                throw new RuntimeException("设备不存在");
+            }
 
-        // 更新记忆策略
-        if (existingEntity.getMemModelId() == null || existingEntity.getMemModelId().equals(Constant.MEMORY_NO_MEM)) {
-            // 删除所有记录
-            agentChatHistoryService.deleteByAgentId(existingEntity.getId(), true, true);
-            existingEntity.setSummaryMemory("");
-        } else if (existingEntity.getChatHistoryConf() != null && existingEntity.getChatHistoryConf() == 1) {
-            // 删除音频数据
-            agentChatHistoryService.deleteByAgentId(existingEntity.getId(), true, false);
+            // 只更新提供的非空字段
+            if (dto.getId() != null) {
+                existingEntity.setAgentId(dto.getId());
+            }
+            if (dto.getAssistantName() != null) {
+                existingEntity.setAssistantName(dto.getAssistantName());
+            }
+            if (dto.getTtsModelId() != null) {
+                existingEntity.setTtsModelId(dto.getTtsModelId());
+            }
+            if (dto.getTtsVoiceType() != null) {
+                existingEntity.setTtsVoiceType(dto.getTtsVoiceType());
+            }
+            if (dto.getTtsVoiceId() != null) {
+                existingEntity.setTtsVoiceId(dto.getTtsVoiceId());
+            }
+            if (dto.getSummaryMemory() != null) {
+                existingEntity.setSummaryMemory(dto.getSummaryMemory());
+            }
+
+            // 设置更新者信息
+            UserDetail user = SecurityUser.getUser();
+            existingEntity.setUpdater(user.getId());
+            existingEntity.setUpdateDate(new Date());
+
+            deviceService.updateById(existingEntity);
         }
-        this.updateById(existingEntity);
     }
 
     @Override
@@ -356,16 +398,16 @@ public class AgentServiceImpl extends BaseServiceImpl<AgentDao, AgentEntity> imp
         AgentTemplateEntity template = agentTemplateService.getDefaultTemplate();
         if (template != null) {
             // 设置模板中的默认值
+            entity.setAssistantName(template.getAssistantName());
             entity.setAsrModelId(template.getAsrModelId());
             entity.setVadModelId(template.getVadModelId());
             entity.setLlmModelId(template.getLlmModelId());
-            entity.setVllmModelId(template.getVllmModelId());
             entity.setTtsModelId(template.getTtsModelId());
             entity.setTtsVoiceId(template.getTtsVoiceId());
+            entity.setTtsVoiceType(template.getTtsVoiceType());
             entity.setMemModelId(template.getMemModelId());
             entity.setIntentModelId(template.getIntentModelId());
             entity.setSystemPrompt(template.getSystemPrompt());
-            entity.setSummaryMemory(template.getSummaryMemory());
             entity.setChatHistoryConf(template.getChatHistoryConf());
             entity.setLangCode(template.getLangCode());
             entity.setLanguage(template.getLanguage());

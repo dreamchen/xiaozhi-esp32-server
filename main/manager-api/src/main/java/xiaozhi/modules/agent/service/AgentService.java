@@ -88,9 +88,10 @@ public interface AgentService extends BaseService<AgentEntity> {
      * 更新智能体
      *
      * @param agentId 智能体ID
+     * @param macAddress 设备MAC地址
      * @param dto     更新智能体所需的信息
      */
-    void updateAgentById(String agentId, AgentUpdateDTO dto);
+    void updateAgentById(String agentId, String macAddress, AgentUpdateDTO dto);
 
     /**
      * 创建智能体

@@ -647,9 +647,6 @@ class ConnectionHandler:
             self.logger.bind(tag=TAG).error(f"LLM 处理出错 {query}: {e}")
             return None
 
-        self.logger.bind(tag=TAG).info(
-            f"大模型处理耗时: {time.time() - start_time:.3f}s | llm_responses:  {llm_responses} | query: {query} | memory_str: {memory_str}"
-        )
         # 处理流式响应
         tool_call_flag = False
         function_name = None
@@ -728,7 +725,7 @@ class ConnectionHandler:
                     )
             if not bHasError:
                 response_message.clear()
-                self.logger.bind(tag=TAG).debug(
+                self.logger.bind(tag=TAG).info(
                     f"function_name={function_name}, function_id={function_id}, function_arguments={function_arguments}"
                 )
                 function_call_data = {
@@ -770,16 +767,12 @@ class ConnectionHandler:
                     )
                 self._handle_function_result(result, function_call_data)
 
-
-        self.logger.bind(tag=TAG).info(
-            f"大模型处理耗时: {time.time() - start_time:.3f}s | response_message:  {response_message}"
-        )
-
         # 存储对话内容
         if len(response_message) > 0:
             self.dialogue.put(
                 Message(role="assistant", content="".join(response_message))
             )
+
         if text_index > 0:
             self.tts.tts_text_queue.put(
                 TTSMessageDTO(
@@ -791,8 +784,9 @@ class ConnectionHandler:
         self.llm_finish_task = True
 
         self.logger.bind(tag=TAG).info(
-            f"大模型处理耗时: {time.time() - start_time:.3f}s | tool_call_flag: {tool_call_flag} | function_call_data:  {function_call_data} | result: {result}"
+            f"大模型处理耗时: {time.time() - start_time:.3f}s | tool_call_flag: {tool_call_flag} | response_message:  {response_message}"
         )
+
         self.logger.bind(tag=TAG).debug(
             json.dumps(self.dialogue.get_llm_dialogue(), indent=4, ensure_ascii=False)
         )

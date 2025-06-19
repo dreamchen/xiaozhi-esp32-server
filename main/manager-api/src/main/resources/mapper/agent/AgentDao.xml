@@ -11,11 +11,13 @@
         <result column="userId"    property="userId"/>
         <result column="agentCode" property="agentCode"/>
         <result column="agentName" property="agentName"/>
+        <result column="assistantName" property="assistantName"/>
         <result column="asrModelId" property="asrModelId"/>
         <result column="vadModelId" property="vadModelId"/>
         <result column="llmModelId" property="llmModelId"/>
         <result column="ttsModelId" property="ttsModelId"/>
         <result column="ttsVoiceId" property="ttsVoiceId"/>
+        <result column="ttsVoiceType" property="ttsVoiceType"/>
         <result column="memModelId" property="memModelId"/>
         <result column="intentModelId" property="intentModelId"/>
 
@@ -24,7 +26,6 @@
 
         <result column="chatHistoryConf" property="chatHistoryConf"/>
         <result column="systemPrompt" property="systemPrompt"/>
-        <result column="summaryMemory" property="summaryMemory"/>
         <result column="langCode" property="langCode"/>
         <result column="language" property="language"/>
         <result column="sort" property="sort"/>
@@ -39,12 +40,14 @@
                a.user_id           AS userId,
                a.agent_code        AS agentCode,
                a.agent_name        AS agentName,
+               a.assistant_name    AS assistantName,
                a.asr_model_id      AS asrModelId,
                a.vad_model_id      AS vadModelId,
                a.llm_model_id      AS llmModelId,
                a.vllm_model_id     AS vllmModelId,
                a.tts_model_id      AS ttsModelId,
                a.tts_voice_id      AS ttsVoiceId,
+               a.tts_voice_type    AS ttsVoiceType,
                a.mem_model_id      AS memModelId,
                a.intent_model_id   AS intentModelId,
                COALESCE(
@@ -62,7 +65,6 @@
                )                   AS functions,
                a.chat_history_conf AS chatHistoryConf,
                a.system_prompt     AS systemPrompt,
-               a.summary_memory    AS summaryMemory,
                a.lang_code         AS langCode,
                a.language          AS language,
                a.sort,
