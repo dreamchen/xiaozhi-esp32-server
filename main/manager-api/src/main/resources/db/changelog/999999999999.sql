@@ -45,6 +45,8 @@ CREATE TABLE `ai_voice_clone` (
                                 INDEX `idx_ai_voice_clone_tts_model_id` (`tts_model_id`) COMMENT '创建 TTS 模型主键的索引，用于快速查找对应模型的声音复刻信息'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='声音复刻表';
 
+-- ADD COLUMN `reference_audio` VARCHAR(500) DEFAULT NULL COMMENT '参考音频路径' AFTER `remark`,
+-- ADD COLUMN `reference_text` VARCHAR(500) DEFAULT NULL COMMENT '参考文本' AFTER `reference_audio`;
 
 -- 更新历史数据
 SET FOREIGN_KEY_CHECKS = 0;
