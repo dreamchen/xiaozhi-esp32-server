@@ -79,7 +79,10 @@
                   {{ isAllSelected ? '取消全选' : '全选' }}
                 </el-button>
                 <el-button type="success" size="mini" class="add-device-btn" @click="handleAddDevice">
-                  新增
+                  验证码绑定
+                </el-button>
+                <el-button type="success" size="mini" class="add-device-btn" @click="handleManualAddDevice">
+                  手动添加
                 </el-button>
                 <el-button size="mini" type="danger" icon="el-icon-delete" @click="deleteSelected">解绑</el-button>
               </div>
@@ -104,7 +107,9 @@
     </div>
 
     <AddDeviceDialog :visible.sync="addDeviceDialogVisible" :agent-id="currentAgentId"
-      @refresh="fetchBindDevices(currentAgentId)" />
+                     @refresh="fetchBindDevices(currentAgentId)"/>
+    <ManualAddDeviceDialog :visible.sync="manualAddDeviceDialogVisible" :agent-id="currentAgentId"
+                     @refresh="fetchBindDevices(currentAgentId)"/>
 
   </div>
 </template>
@@ -113,13 +118,19 @@
 import {showDanger, showSuccess} from '@/utils'
 import Api from '@/apis/api';
 import AddDeviceDialog from "@/components/AddDeviceDialog.vue";
+import ManualAddDeviceDialog from "@/components/ManualAddDeviceDialog.vue";
 import HeaderBar from "@/components/HeaderBar.vue";
 
 export default {
-  components: { HeaderBar, AddDeviceDialog },
+  components: {
+    HeaderBar, 
+    AddDeviceDialog,
+    ManualAddDeviceDialog
+  },
   data() {
     return {
       addDeviceDialogVisible: false,
+      manualAddDeviceDialogVisible: false,
       selectedDevices: [],
       isAllSelected: false,
       searchKeyword: "",
@@ -261,6 +272,9 @@ export default {
 
     handleAddDevice() {
       this.addDeviceDialogVisible = true;
+    },
+    handleManualAddDevice() {
+      this.manualAddDeviceDialogVisible = true;
     },
     startEditRemark(index, row) {
       this.oldVal = row.alias || '';

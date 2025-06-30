@@ -25,6 +25,8 @@ import xiaozhi.modules.agent.service.AgentChatHistoryService;
 import xiaozhi.modules.device.dto.DeviceDTO;
 import xiaozhi.modules.device.dto.DeviceRegisterDTO;
 import xiaozhi.modules.device.dto.DeviceUnBindDTO;
+import xiaozhi.modules.device.dto.DeviceUpdateDTO;
+import xiaozhi.modules.device.dto.DeviceManualAddDTO;
 import xiaozhi.modules.device.entity.DeviceEntity;
 import xiaozhi.modules.device.service.DeviceService;
 import xiaozhi.modules.security.user.SecurityUser;
@@ -163,6 +165,15 @@ public class DeviceController {
         entity.setUpdateDate(new Date());
         deviceService.updateById(entity);
         return new Result<Void>();
+    }
+
+    @PostMapping("/manual-add")
+    @Operation(summary = "手动添加设备")
+    @RequiresPermissions("sys:role:normal")
+    public Result<Void> manualAddDevice(@RequestBody @Valid DeviceManualAddDTO dto) {
+        UserDetail user = SecurityUser.getUser();
+        deviceService.manualAddDevice(user.getId(), dto);
+        return new Result<>();
     }
 
     @GetMapping("/{macAddress}/sessions")

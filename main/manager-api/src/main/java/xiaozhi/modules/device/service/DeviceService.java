@@ -9,6 +9,7 @@ import xiaozhi.modules.device.dto.DeviceDTO;
 import xiaozhi.modules.device.dto.DevicePageUserDTO;
 import xiaozhi.modules.device.dto.DeviceReportReqDTO;
 import xiaozhi.modules.device.dto.DeviceReportRespDTO;
+import xiaozhi.modules.device.dto.DeviceManualAddDTO;
 import xiaozhi.modules.device.entity.DeviceEntity;
 import xiaozhi.modules.device.vo.UserShowDeviceListVO;
 
@@ -88,6 +89,15 @@ public interface DeviceService extends BaseService<DeviceEntity> {
      */
     Date getLatestLastConnectionTime(String agentId);
 
+    /**
+     * 手动添加设备
+     */
+    void manualAddDevice(Long userId, DeviceManualAddDTO dto);
+
+    /**
+     * 更新设备连接信息
+     */
+    void updateDeviceConnectionInfo(String agentId, String deviceId, String appVersion);
     /**
      * 获取智能体的所有设备列表，
      */
